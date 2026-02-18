@@ -21,7 +21,25 @@ function readNumber(value: string | undefined, fallback: number): number {
 export interface AppConfig {
   knowledgeDir: string;
   dbPath: string;
+  runtimeDbPath: string;
   webCacheDir: string;
+  whoiamSync: {
+    enabled: boolean;
+    schedule: string;
+    docPath: string;
+    statePath: string;
+    watchFiles: string[];
+  };
+  githubSync: {
+    enabled: boolean;
+    schedule: string;
+    owner: string;
+    repo: string;
+    apiBaseUrl: string;
+    token?: string;
+    outputFile: string;
+    reindexAfterSync: boolean;
+  };
   api: {
     enabled: boolean;
     host: string;
@@ -43,6 +61,12 @@ export interface AppConfig {
   retrieval: {
     defaultTopK: number;
   };
+  generation: {
+    maxContextChars: number;
+    maxResponseTokens: number;
+    temperature: number;
+    systemPrompt: string;
+  };
   chunking: {
     maxChars: number;
     overlapChars: number;
@@ -53,7 +77,11 @@ export function getConfig(): AppConfig {
   const cwd = process.cwd();
   const knowledgeDir = path.resolve(cwd, process.env.TOM_KNOWLEDGE_DIR ?? ".");
   const dbPath = path.resolve(cwd, process.env.VECTOR_DB_PATH ?? "memory/tom_brain.sqlite");
+  const runtimeDbPath = path.resolve(cwd, process.env.RUNTIME_DB_PATH ?? "memory/tom_runtime.sqlite");
   const webCacheDir = path.resolve(cwd, process.env.WEB_CACHE_DIR ?? "memory/web");
+  const githubOutputFile = path.resolve(cwd, process.env.GITHUB_SYNC_OUTPUT_FILE ?? "automation/github-report.md");
+  const whoiamDocPath = path.resolve(cwd, process.env.WHOIAM_DOC_PATH ?? ".tom-workspace/whoiam.md");
+  const whoiamStatePath = path.resolve(cwd, process.env.WHOIAM_SYNC_STATE_PATH ?? "memory/whoiam-sync-state.json");
 
   const queryEnv = process.env.WEB_ENRICHMENT_QUERIES ?? "";
   const queries = queryEnv
@@ -61,10 +89,49 @@ export function getConfig(): AppConfig {
     .map((entry) => entry.trim())
     .filter(Boolean);
 
+  const watchFilesEnv =
+    process.env.WHOIAM_SYNC_WATCH_FILES ??
+    [
+      "src/index.ts",
+      "src/core/config.ts",
+      "src/core/brain.ts",
+      "src/integrations/knowledgeLoader.ts",
+      "src/integrations/vectorStore.ts",
+      "src/api/httpServer.ts",
+      "src/jobs/cycleJob.ts",
+      "src/jobs/githubSyncJob.ts",
+      "src/integrations/githubReportSync.ts",
+      "package.json",
+      "README.md",
+    ].join("|");
+
+  const watchFiles = watchFilesEnv
+    .split("|")
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+
   return {
     knowledgeDir,
     dbPath,
+    runtimeDbPath,
     webCacheDir,
+    whoiamSync: {
+      enabled: readBoolean(process.env.WHOIAM_SYNC_ENABLED, true),
+      schedule: process.env.WHOIAM_SYNC_SCHEDULE ?? "15 */6 * * *",
+      docPath: whoiamDocPath,
+      statePath: whoiamStatePath,
+      watchFiles,
+    },
+    githubSync: {
+      enabled: readBoolean(process.env.GITHUB_SYNC_ENABLED, true),
+      schedule: process.env.GITHUB_SYNC_SCHEDULE ?? "0 */4 * * *",
+      owner: process.env.GITHUB_SYNC_OWNER ?? "RobbyMo81",
+      repo: process.env.GITHUB_SYNC_REPO ?? "ToM",
+      apiBaseUrl: process.env.GITHUB_API_BASE_URL ?? "https://api.github.com",
+      token: process.env.GITHUB_TOKEN,
+      outputFile: githubOutputFile,
+      reindexAfterSync: readBoolean(process.env.GITHUB_SYNC_REINDEX, true),
+    },
     api: {
       enabled: readBoolean(process.env.TOM_API_ENABLED, true),
       host: process.env.TOM_API_HOST ?? "127.0.0.1",
@@ -85,6 +152,14 @@ export function getConfig(): AppConfig {
     },
     retrieval: {
       defaultTopK: readNumber(process.env.SEARCH_DEFAULT_TOP_K, 8),
+    },
+    generation: {
+      maxContextChars: readNumber(process.env.GENERATE_MAX_CONTEXT_CHARS, 8_000),
+      maxResponseTokens: readNumber(process.env.GENERATE_MAX_RESPONSE_TOKENS, 600),
+      temperature: readNumber(process.env.GENERATE_TEMPERATURE, 0.2),
+      systemPrompt:
+        process.env.GENERATE_SYSTEM_PROMPT ??
+        "You are ToM Brain. Ground your answer in retrieved context and acknowledge uncertainty when context is missing.",
     },
     chunking: {
       maxChars: readNumber(process.env.CHUNK_MAX_CHARS, 1200),

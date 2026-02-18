@@ -34,6 +34,14 @@ export interface SearchResult {
   path: string;
 }
 
+export interface GenerationResult {
+  question: string;
+  answer: string;
+  model: string;
+  contextCount: number;
+  contexts: SearchResult[];
+}
+
 export interface CycleReport {
   startedAt: string;
   finishedAt: string;

@@ -1,5 +1,8 @@
 import { ToMBrain } from "./core/brain";
 import { logger } from "./core/logger";
+import { getConfig } from "./core/config";
+import { syncGitHubReport } from "./integrations/githubReportSync";
+import { syncWhoiamDocument } from "./integrations/whoiamSync";
 
 async function run(): Promise<void> {
   const [, , command, ...rest] = process.argv;
@@ -15,7 +18,7 @@ async function run(): Promise<void> {
     if (command === "query") {
       const question = rest.join(" ").trim();
       if (!question) {
-        throw new Error("Provide a query string. Example: npm run query -- \"what did I learn about ssh hardening?\"");
+        throw new Error('Provide a query string. Example: npm run query -- "what did I learn about ssh hardening?"');
       }
       const results = await brain.query(question);
       logger.info(`Query results for: ${question}`);
@@ -28,16 +31,51 @@ async function run(): Promise<void> {
       return;
     }
 
+    if (command === "generate") {
+      const question = rest.join(" ").trim();
+      if (!question) {
+        throw new Error(
+          'Provide a query string. Example: npm run generate -- "summarize what I learned about ssh hardening"'
+        );
+      }
+      const result = await brain.generate(question);
+      logger.info(`Generated answer for: ${question}`);
+      console.log(result.answer);
+      return;
+    }
+
     if (command === "cycle") {
       const report = await brain.runCycle();
       logger.info("Cycle report", report);
       return;
     }
 
+    if (command === "github-sync") {
+      const config = getConfig();
+      const syncReport = await syncGitHubReport(config);
+      logger.info("GitHub sync report", syncReport);
+
+      if (config.githubSync.reindexAfterSync) {
+        const ingest = await brain.ingestLocalKnowledge();
+        logger.info("GitHub sync reindex report", ingest);
+      }
+      return;
+    }
+
+    if (command === "whoiam-sync") {
+      const config = getConfig();
+      const report = await syncWhoiamDocument(config);
+      logger.info("WhoAmI sync report", report);
+      return;
+    }
+
     console.log("Usage:");
     console.log("  npm run ingest");
-    console.log("  npm run query -- \"<question>\"");
+    console.log('  npm run query -- "<question>"');
+    console.log('  npm run generate -- "<question>"');
     console.log("  npm run cycle");
+    console.log("  npm run github:sync");
+    console.log("  npm run whoiam:sync");
   } finally {
     brain.shutdown();
   }

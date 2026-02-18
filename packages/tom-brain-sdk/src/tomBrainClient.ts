@@ -1,10 +1,11 @@
 import {
-  CycleResponse,
-  HealthResponse,
-  IngestResponse,
-  QueryResponse,
-  StatsResponse,
-  ToMClientOptions,
+  type CycleResponse,
+  type GenerateResponse,
+  type HealthResponse,
+  type IngestResponse,
+  type QueryResponse,
+  type StatsResponse,
+  type ToMClientOptions,
 } from "./types";
 
 interface QueryPayload {
@@ -37,6 +38,14 @@ export class ToMBrainClient {
       payload.topK = topK;
     }
     return this.post<QueryResponse>("/query", payload);
+  }
+
+  async generate(question: string, topK?: number): Promise<GenerateResponse> {
+    const payload: QueryPayload = { question };
+    if (typeof topK === "number") {
+      payload.topK = topK;
+    }
+    return this.post<GenerateResponse>("/generate", payload);
   }
 
   async ingest(): Promise<IngestResponse> {

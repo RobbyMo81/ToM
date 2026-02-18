@@ -1,9 +1,9 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { AppConfig } from "../core/config";
+import { type AppConfig } from "../core/config";
 import { sha256 } from "../core/hash";
-import { KnowledgeDocument } from "../core/types";
-import { BraveResult } from "./braveClient";
+import { type KnowledgeDocument } from "../core/types";
+import { type BraveResult } from "./braveClient";
 
 export async function braveResultsToDocuments(
   query: string,

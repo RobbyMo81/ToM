@@ -1,9 +1,14 @@
-import { createServer, IncomingMessage, ServerResponse } from "node:http";
+import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { getConfig } from "../core/config";
 import { logger } from "../core/logger";
 import { ToMBrain } from "../core/brain";
 
 interface QueryBody {
+  question?: string;
+  topK?: number;
+}
+
+interface GenerateBody {
   question?: string;
   topK?: number;
 }
@@ -131,6 +136,29 @@ export function startHttpApi(): void {
             count: results.length,
             results,
           });
+        } finally {
+          brain.shutdown();
+        }
+        return;
+      }
+
+      if (method === "POST" && requestUrl.pathname === "/generate") {
+        const body = await parseJsonBody<GenerateBody>(request);
+        const question = body.question?.trim();
+
+        if (!question) {
+          sendJson(response, 400, {
+            error: "Invalid request",
+            message: "Body must include 'question'.",
+          });
+          return;
+        }
+
+        const brain = new ToMBrain();
+        try {
+          const topK = typeof body.topK === "number" ? body.topK : undefined;
+          const result = await brain.generate(question, topK);
+          sendJson(response, 200, result);
         } finally {
           brain.shutdown();
         }

@@ -1,0 +1,16 @@
+{
+  "lastSyncedAt": "2026-02-18T16:16:02.934Z",
+  "fileHashes": {
+    "src/index.ts": "1e757afe4c0c3243fc09a469ae8f6cd7732a7643351986f04b5b2ad46100c2d9",
+    "src/core/config.ts": "6f62e0d0cf5b223d180ffcbec24ca37528dfb1b3b05f502499075e8aca086355",
+    "src/core/brain.ts": "a1bdd3253f64af428b1cacbfd1af532d08fe246845fa03a577cfb9c9ceb11708",
+    "src/integrations/knowledgeLoader.ts": "192c01278fb6039acb56b5c5c69b132afe913a63f5811a70a25879d08a840fe4",
+    "src/integrations/vectorStore.ts": "9b8938e16b91f69f9199489b922e94c52acd81f7edd49983983c02415cfaebd2",
+    "src/api/httpServer.ts": "1fbe63a77f36a8c55599afc6d4275054c9afe5a743daa5f50bb27e1ad602bdb6",
+    "src/jobs/cycleJob.ts": "cb3e6715d979c86856bd15f0918457a1a5df0f65b4fe548d7d8eb40ff420d664",
+    "src/jobs/githubSyncJob.ts": "1baf6b07df26a7e4c6e11f466cfd3b871ede198d17652dd40aa6b73834680762",
+    "src/integrations/githubReportSync.ts": "9ee906ffd1e4c20fbf7b42e845be8230bcb07ec5c1f2344aa5117b9e7d7b24c4",
+    "package.json": "19f60287f3109f2a29436d8f9caccbbfe265a98633068191aed5a8c5cf9cb2d7",
+    "README.md": "4db0701197c7465b934128c429618e27f9457900d1ca72f519d86e7577fee3f9"
+  }
+}

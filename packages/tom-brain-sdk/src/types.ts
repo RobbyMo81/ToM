@@ -16,6 +16,14 @@ export interface QueryResponse {
   results: ApiSearchResult[];
 }
 
+export interface GenerateResponse {
+  question: string;
+  answer: string;
+  model: string;
+  contextCount: number;
+  contexts: ApiSearchResult[];
+}
+
 export interface IngestResponse {
   action: "ingest";
   report: {

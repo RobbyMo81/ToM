@@ -3,6 +3,7 @@
 ToM Brain converts your markdown knowledge base into a local, queryable vector memory system.
 
 It classifies files into your three domains:
+
 - `Learn*` → Learn
 - `Lesson*` / `Lessons*` → Lesson
 - `Plan*` → Plan
@@ -16,6 +17,21 @@ It classifies files into your three domains:
 5. Optionally enriches memory with Brave web search snapshots
 6. Runs on cron using a predefined cycle
 
+### Included knowledge sources
+
+Local ingestion now includes:
+
+- project documentation in `docs/**/*.md`
+- automation SOP runbooks in `automation/**/*.md`
+
+Local ingestion explicitly excludes:
+
+- `.tom-workspace/**` (governance/identity/behavior context only; not vectorized)
+
+Operational source tags are added automatically for retrieval quality:
+
+- automation SOP docs: `sop`, `automation`, `autonomy`, `runbook`, `operations`, `task-execution`
+
 ## Predetermined Cycle of Operations
 
 Every cron run (`TOM_CRON_SCHEDULE`) executes:
@@ -24,6 +40,28 @@ Every cron run (`TOM_CRON_SCHEDULE`) executes:
 2. **Local Ingestion**: scan + incrementally index changed docs
 3. **Web Enrichment**: run configured Brave queries and index snapshots
 4. **Memory Report**: return cycle metrics for orchestration/logging
+
+## GitHub Report Sync Cron
+
+ToM can sync a GitHub repository report on its own interval and write it to markdown.
+
+- Schedule config: `GITHUB_SYNC_SCHEDULE`
+- Default output file: `automation/github-report.md`
+- Optional auth/rate-limit token: `GITHUB_TOKEN`
+- Optional automatic reindex after sync: `GITHUB_SYNC_REINDEX=true`
+
+This is a separate cron job from `TOM_CRON_SCHEDULE`.
+
+## WhoAmI Living-Document Sync Cron
+
+ToM can auto-maintain `.tom-workspace/whoiam.md` as a living architecture/system-logic document.
+
+- Schedule config: `WHOIAM_SYNC_SCHEDULE`
+- Document path: `WHOIAM_DOC_PATH` (default `.tom-workspace/whoiam.md`)
+- State file: `WHOIAM_SYNC_STATE_PATH` (default `memory/whoiam-sync-state.json`)
+- Watched files: `WHOIAM_SYNC_WATCH_FILES` (pipe-separated relative paths)
+
+When watched files change, ToM updates an auto-generated snapshot section in `whoiam.md`.
 
 ## Setup
 
@@ -52,9 +90,25 @@ Every cron run (`TOM_CRON_SCHEDULE`) executes:
   ```bash
   npm run query -- "What lessons did I record about SSH hardening?"
   ```
+- Retrieval-grounded generation:
+  ```bash
+  npm run generate -- "Summarize what I learned about SSH hardening"
+  ```
 - Run one full cycle:
   ```bash
   npm run cycle
+  ```
+- Run GitHub report sync once:
+  ```bash
+  npm run github:sync
+  ```
+- Run WhoAmI living-document sync once:
+  ```bash
+  npm run whoiam:sync
+  ```
+- Run lint suite:
+  ```bash
+  npm run lint:all
   ```
 - Start cron scheduler:
   ```bash
@@ -66,9 +120,58 @@ Every cron run (`TOM_CRON_SCHEDULE`) executes:
   npm run api
   ```
 
+## Build Planning Template
+
+Use the one-task planning template for all future build efforts:
+
+- `docs/build/Build_OneTask_Template.md`
+
+This template ensures each build includes:
+
+- must-have requirements
+- recommendations and defer/implement decisions
+- quality gates and evidence
+- CI/policy requirements
+- external action ownership
+- debrief-ready verification logs
+
+## Git Hooks
+
+This repo uses Husky + Commitlint.
+
+- `pre-commit` runs `npm run build`, `npm run lint`, and `npm run lint:md`
+- `commit-msg` enforces Conventional Commits via Commitlint
+- commit scope is required (e.g. `feat(brain): ...`)
+- commit subject must be concise, lowercase style, and no trailing period
+- commit header max length is 100 characters
+
+Examples:
+
+- `feat(brain): add whoiam sync cron`
+- `fix(api): handle empty query payload`
+
+See detailed commit guide: `.github/COMMIT_CONVENTION.md`
+
+## CI and Branch Protection
+
+- CI workflow: `.github/workflows/ci.yml`
+- Trigger: push + pull request on `main`
+- Required commands in CI:
+  - `npm ci`
+  - `npm run build`
+  - `npm run lint:all`
+
+Recommended GitHub repo settings follow-up:
+
+1. Enable branch protection on `main`
+2. Require pull request before merge
+3. Require status checks before merge
+4. Add required status check: `build-and-lint`
+
 ## Integration in your AI system family
 
 This service is designed as a memory subsystem. In your other apps:
+
 - invoke `npm run cycle` from orchestrators when needed, or keep scheduler running
 - call `npm run query -- "..."` for retrieval
 - read cycle metrics from stdout logs
@@ -82,6 +185,7 @@ By default the API binds to `127.0.0.1:8787`.
 - `GET /health` → service heartbeat
 - `GET /stats` → vector count
 - `POST /query` with JSON body `{ "question": "...", "topK": 8 }`
+- `POST /generate` with JSON body `{ "question": "...", "topK": 8 }`
 - `POST /ingest` → run local markdown ingestion
 - `POST /cycle` → run full predetermined cycle
 
@@ -97,6 +201,12 @@ curl -X POST http://127.0.0.1:8787/query \
   -d '{"question":"What lessons did I record about SSH hardening?","topK":6}'
 ```
 
+```bash
+curl -X POST http://127.0.0.1:8787/generate \
+  -H "Content-Type: application/json" \
+  -d '{"question":"Summarize what I learned about SSH hardening.","topK":6}'
+```
+
 ### Optional auth
 
 If you set `TOM_API_TOKEN`, all requests must include:
@@ -107,12 +217,12 @@ Authorization: Bearer <your-token>
 
 ## TypeScript SDK (for sibling apps)
 
-Use the lightweight client in `src/sdk` for typed local calls.
+Use the workspace package `@tom/brain-sdk` for typed local calls.
 
 ### Import
 
 ```ts
-import { ToMBrainClient } from "./src/sdk";
+import { ToMBrainClient } from "@tom/brain-sdk";
 ```
 
 ### Usage
@@ -126,12 +236,38 @@ const client = new ToMBrainClient({
 const health = await client.health();
 const stats = await client.stats();
 const query = await client.query("What lessons did I record about SSH hardening?", 6);
+const generated = await client.generate("Summarize what I learned about SSH hardening.", 6);
 ```
+
+## Generation controls
+
+Generation behavior can be tuned with environment variables:
+
+- `GENERATE_MAX_CONTEXT_CHARS` (default `8000`)
+- `GENERATE_MAX_RESPONSE_TOKENS` (default `600`)
+- `GENERATE_TEMPERATURE` (default `0.2`)
+- `GENERATE_SYSTEM_PROMPT` (grounding instruction for generated responses)
+
+Operational caveat: generation quality and latency depend on local model availability (`OLLAMA_CHAT_MODEL`) and host capacity.
 
 ### Example runner
 
 ```bash
 npm run sdk:example
+```
+
+### Build the workspace package
+
+```bash
+npm run build:sdk
+```
+
+### Use from another local repo
+
+In your sibling app repo, add a local file dependency:
+
+```bash
+npm install --save "file:../ToM/packages/tom-brain-sdk"
 ```
 
 ## Key Files

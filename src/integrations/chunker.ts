@@ -1,6 +1,6 @@
-import { AppConfig } from "../core/config";
+import { type AppConfig } from "../core/config";
 import { sha256 } from "../core/hash";
-import { KnowledgeChunk, KnowledgeDocument } from "../core/types";
+import { type KnowledgeChunk, type KnowledgeDocument } from "../core/types";
 
 function normalizeWhitespace(input: string): string {
   return input.replace(/\r\n/g, "\n").trim();

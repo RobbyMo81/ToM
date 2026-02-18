@@ -1,4 +1,4 @@
-import { AppConfig } from "../core/config";
+import { type AppConfig } from "../core/config";
 
 export interface BraveResult {
   title: string;

@@ -1,4 +1,9 @@
-import { AppConfig } from "../core/config";
+import { type AppConfig } from "../core/config";
+
+interface OllamaChatMessage {
+  role: "system" | "user" | "assistant";
+  content: string;
+}
 
 export class OllamaClient {
   constructor(private readonly config: AppConfig) {}
@@ -35,5 +40,45 @@ export class OllamaClient {
     } catch {
       return false;
     }
+  }
+
+  async generate(
+    messages: OllamaChatMessage[],
+    options?: { temperature?: number; numPredict?: number }
+  ): Promise<string> {
+    const response = await fetch(`${this.config.ollama.baseUrl}/api/chat`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: this.config.ollama.chatModel,
+        messages,
+        stream: false,
+        options: {
+          temperature: options?.temperature,
+          num_predict: options?.numPredict,
+        },
+      }),
+    });
+
+    if (!response.ok) {
+      const details = await response.text();
+      throw new Error(`Ollama generation failed: ${response.status} ${details}`);
+    }
+
+    const payload = (await response.json()) as {
+      message?: {
+        content?: string;
+      };
+      response?: string;
+    };
+
+    const text = payload.message?.content ?? payload.response;
+    if (typeof text !== "string" || text.trim().length === 0) {
+      throw new Error("Ollama generation response did not include message content.");
+    }
+
+    return text.trim();
   }
 }

@@ -1,6 +1,7 @@
 import { getConfig } from "./config";
 import { logger } from "./logger";
-import { CycleReport, KnowledgeDocument, SearchResult } from "./types";
+import path from "node:path";
+import { type CycleReport, type GenerationResult, type KnowledgeDocument, type SearchResult } from "./types";
 import { chunkDocument } from "../integrations/chunker";
 import { loadKnowledgeDocs } from "../integrations/knowledgeLoader";
 import { OllamaClient } from "../integrations/ollamaClient";
@@ -15,12 +16,29 @@ export class ToMBrain {
   private readonly brave = new BraveClient(this.config);
 
   async ingestLocalKnowledge(): Promise<{ documentsIndexed: number; chunksIndexed: number; discovered: number }> {
+    const governanceDir = path.resolve(this.config.knowledgeDir, ".tom-workspace");
+    const purged = this.vectors.purgeLocalDocumentsByPathPrefix(governanceDir);
+    if (purged > 0) {
+      logger.info("Purged governance identity docs from vector store.", { purged });
+    }
+
     const docs = await loadKnowledgeDocs(this.config);
     const filtered = docs.filter((doc) => doc.sourceType === "local");
+
+    const activeIds = new Set(filtered.map((doc) => doc.id));
+    const stalePurged = this.vectors.purgeLocalDocumentsNotInSet(activeIds);
+    if (stalePurged > 0) {
+      logger.info("Purged stale local docs missing from workspace.", { purged: stalePurged });
+    }
+
     return this.indexDocuments(filtered);
   }
 
-  async enrichWithWebKnowledge(): Promise<{ webQueriesRun: number; webDocumentsIndexed: number; chunksIndexed: number }> {
+  async enrichWithWebKnowledge(): Promise<{
+    webQueriesRun: number;
+    webDocumentsIndexed: number;
+    chunksIndexed: number;
+  }> {
     if (!this.config.webEnrichment.enabled || this.config.webEnrichment.queries.length === 0) {
       return { webQueriesRun: 0, webDocumentsIndexed: 0, chunksIndexed: 0 };
     }
@@ -78,6 +96,63 @@ export class ToMBrain {
   async query(question: string, topK = this.config.retrieval.defaultTopK): Promise<SearchResult[]> {
     const vector = await this.ollama.embed(question);
     return this.vectors.similaritySearch(vector, topK);
+  }
+
+  async generate(question: string, topK = this.config.retrieval.defaultTopK): Promise<GenerationResult> {
+    const contexts = await this.query(question, topK);
+
+    const contextBlocks: string[] = [];
+    let consumedChars = 0;
+    for (let index = 0; index < contexts.length; index += 1) {
+      const context = contexts[index];
+      const block = [
+        `Context ${index + 1}:`,
+        `source=${context.path}`,
+        `score=${context.score.toFixed(4)}`,
+        context.content,
+      ].join("\n");
+
+      if (consumedChars + block.length > this.config.generation.maxContextChars) {
+        break;
+      }
+
+      contextBlocks.push(block);
+      consumedChars += block.length;
+    }
+
+    const answer = await this.ollama.generate(
+      [
+        {
+          role: "system",
+          content: this.config.generation.systemPrompt,
+        },
+        {
+          role: "user",
+          content: [
+            "Answer the user question using the context below.",
+            "If context is insufficient, say so briefly and avoid fabricating details.",
+            "",
+            "Question:",
+            question,
+            "",
+            "Retrieved Context:",
+            contextBlocks.length > 0 ? contextBlocks.join("\n\n") : "(no context retrieved)",
+          ].join("\n"),
+        },
+      ],
+      {
+        temperature: this.config.generation.temperature,
+        numPredict: this.config.generation.maxResponseTokens,
+      }
+    );
+
+    return {
+      question,
+      answer,
+      model: this.config.ollama.chatModel,
+      contextCount: contextBlocks.length,
+      contexts: contexts.slice(0, contextBlocks.length),
+    };
   }
 
   getVectorCount(): number {

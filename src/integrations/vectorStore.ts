@@ -1,7 +1,7 @@
 import Database from "better-sqlite3";
 import { mkdirSync } from "node:fs";
 import path from "node:path";
-import { SearchResult } from "../core/types";
+import { type SearchResult } from "../core/types";
 
 interface VectorRow {
   chunk_id: string;
@@ -147,15 +147,45 @@ export class VectorStore {
   }
 
   getDocumentChecksum(documentId: string): string | undefined {
-    const row = this.db
-      .prepare("SELECT checksum FROM documents WHERE id = ?")
-      .get(documentId) as { checksum?: string } | undefined;
+    const row = this.db.prepare("SELECT checksum FROM documents WHERE id = ?").get(documentId) as
+      | { checksum?: string }
+      | undefined;
     return row?.checksum;
   }
 
   deleteVectorsForDocument(documentId: string): void {
     this.db.prepare("DELETE FROM vectors WHERE document_id = ?").run(documentId);
     this.db.prepare("DELETE FROM chunks WHERE document_id = ?").run(documentId);
+  }
+
+  purgeLocalDocumentsByPathPrefix(pathPrefix: string): number {
+    const rows = this.db
+      .prepare("SELECT id FROM documents WHERE source_type = 'local' AND path LIKE ?")
+      .all(`${pathPrefix}%`) as Array<{ id: string }>;
+
+    for (const row of rows) {
+      this.deleteVectorsForDocument(row.id);
+      this.db.prepare("DELETE FROM documents WHERE id = ?").run(row.id);
+    }
+
+    return rows.length;
+  }
+
+  purgeLocalDocumentsNotInSet(activeDocumentIds: Set<string>): number {
+    const rows = this.db.prepare("SELECT id FROM documents WHERE source_type = 'local'").all() as Array<{ id: string }>;
+
+    let purged = 0;
+    for (const row of rows) {
+      if (activeDocumentIds.has(row.id)) {
+        continue;
+      }
+
+      this.deleteVectorsForDocument(row.id);
+      this.db.prepare("DELETE FROM documents WHERE id = ?").run(row.id);
+      purged += 1;
+    }
+
+    return purged;
   }
 
   countVectors(): number {
@@ -165,9 +195,7 @@ export class VectorStore {
 
   similaritySearch(queryVector: number[], topK: number): SearchResult[] {
     const rows = this.db
-      .prepare(
-        "SELECT chunk_id, document_id, area, source_type, path, content, vector_json FROM vectors"
-      )
+      .prepare("SELECT chunk_id, document_id, area, source_type, path, content, vector_json FROM vectors")
       .all() as VectorRow[];
 
     const scored = rows
