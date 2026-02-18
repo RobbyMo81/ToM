@@ -23,6 +23,7 @@
     "api": "tsx src/index.ts",
     "sdk:example": "tsx src/sdk/example.ts",
     "ingest": "tsx src/cli.ts ingest",
+    "runtime:init": "tsx src/scripts/initRuntimeMemory.ts",
     "query": "tsx src/cli.ts query \"What did I learn about SSH hardening?\"",
     "generate": "tsx src/cli.ts generate \"Summarize what I learned about SSH hardening.\"",
     "cycle": "tsx src/cli.ts cycle",

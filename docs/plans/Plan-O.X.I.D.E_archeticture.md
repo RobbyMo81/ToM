@@ -1,9 +1,9 @@
 # **O.X.I.D.E.** — Operational X-ray for Introspective Development & Enhancement
 
-* A **Rust-resident cognitive layer**
-* Parity with the **host application’s LLM brain**
-* **Local model execution via Ollama**
-* Continued adherence to **governed self-improvement**, not autonomous mutation
+- A **Rust-resident cognitive layer**
+- Parity with the **host application’s LLM brain**
+- **Local model execution via Ollama**
+- Continued adherence to **governed self-improvement**, not autonomous mutation
 
 Below is the **CTO-level architectural amendment** to integrate that capability cleanly and safely.
 
@@ -15,10 +15,10 @@ Below is the **CTO-level architectural amendment** to integrate that capability 
 
 O.X.I.D.E. must include a **localized reasoning subsystem** implemented in Rust that provides:
 
-* Structured reasoning over detected skills
-* Deterministic proposal synthesis
-* Policy-aware decision support
-* Offline/self-contained cognition
+- Structured reasoning over detected skills
+- Deterministic proposal synthesis
+- Policy-aware decision support
+- Offline/self-contained cognition
 
 This brain **does not replace** the host LLM brain.
 It acts as a **bounded, safety-oriented co-processor** dedicated to:
@@ -33,21 +33,21 @@ It acts as a **bounded, safety-oriented co-processor** dedicated to:
 
 Responsible for:
 
-* General reasoning
-* Skill discovery
-* Long-context learning
-* External knowledge synthesis
-* Creative solution generation
+- General reasoning
+- Skill discovery
+- Long-context learning
+- External knowledge synthesis
+- Creative solution generation
 
 ### O.X.I.D.E. Brain (Rust + Ollama)
 
 Responsible for:
 
-* Translating skills → deterministic patches
-* Running validation reasoning
-* Enforcing governance logic
-* Performing risk classification
-* Operating in **offline / secure mode**
+- Translating skills → deterministic patches
+- Running validation reasoning
+- Enforcing governance logic
+- Performing risk classification
+- Operating in **offline / secure mode**
 
 **Key rule:**
 
@@ -61,21 +61,21 @@ O.X.I.D.E. must support **local inference via Ollama** with the following guaran
 
 ### Model Execution Constraints
 
-* **Local-only by default**
-* No outbound network calls during reasoning
-* Model whitelist enforced via policy
-* Deterministic temperature bounds (e.g., ≤ 0.3 for patch synthesis)
-* Token/output length caps
+- **Local-only by default**
+- No outbound network calls during reasoning
+- Model whitelist enforced via policy
+- Deterministic temperature bounds (e.g., ≤ 0.3 for patch synthesis)
+- Token/output length caps
 
 ### Required Capabilities
 
 Ollama-backed reasoning must support:
 
-* Structured JSON output
-* Chain-of-thought suppression in logs
-* Tool-calling or function schema output
-* Deterministic retry with seed control
-* Timeout + circuit breaker behavior
+- Structured JSON output
+- Chain-of-thought suppression in logs
+- Tool-calling or function schema output
+- Deterministic retry with seed control
+- Timeout + circuit breaker behavior
 
 ---
 
@@ -97,11 +97,11 @@ oxide-brain/
 
 ### Runtime Guarantees
 
-* Memory-safe execution (no unsafe unless audited)
-* Async inference handling
-* Deterministic state transitions
-* Full observability hooks
-* Graceful degradation if Ollama unavailable
+- Memory-safe execution (no unsafe unless audited)
+- Async inference handling
+- Deterministic state transitions
+- Full observability hooks
+- Graceful degradation if Ollama unavailable
 
 If Ollama fails:
 
@@ -122,9 +122,9 @@ Self-improvement must require **cross-brain agreement**:
 
 No single brain can:
 
-* Discover **and**
-* Approve **and**
-* Deploy
+- Discover **and**
+- Approve **and**
+- Deploy
 
 This enforces **separation of cognitive powers**.
 
@@ -136,20 +136,20 @@ Because Ollama introduces executable model logic:
 
 O.X.I.D.E. must enforce:
 
-* Signed model manifests
-* Checksum validation
-* Model capability classification
-* Sandboxed inference execution
-* Resource quotas (CPU, RAM, GPU)
+- Signed model manifests
+- Checksum validation
+- Model capability classification
+- Sandboxed inference execution
+- Resource quotas (CPU, RAM, GPU)
 
 ### Explicit Prohibition
 
 O.X.I.D.E. brain **must never**:
 
-* Download models autonomously
-* Upgrade its own reasoning model
-* Modify inference policies
-* Change governance thresholds
+- Download models autonomously
+- Upgrade its own reasoning model
+- Modify inference policies
+- Change governance thresholds
 
 All require **human-approved PR**.
 
@@ -159,12 +159,12 @@ All require **human-approved PR**.
 
 New telemetry required:
 
-* Model used for reasoning
-* Prompt class identifier (not raw prompt)
-* Determinism score
-* Retry count
-* Inference latency
-* Reasoning → CI success correlation
+- Model used for reasoning
+- Prompt class identifier (not raw prompt)
+- Determinism score
+- Retry count
+- Inference latency
+- Reasoning → CI success correlation
 
 Stored alongside existing:
 
@@ -192,12 +192,12 @@ oxide_audit_log.json
 
 Before enabling the Rust brain:
 
-* Offline Ollama inference validated
-* Deterministic JSON reasoning proven
-* Sandboxed execution verified
-* Cross-brain approval workflow tested
-* Safe-mode fallback demonstrated
-* Model pinning + checksum enforcement working
+- Offline Ollama inference validated
+- Deterministic JSON reasoning proven
+- Sandboxed execution verified
+- Cross-brain approval workflow tested
+- Safe-mode fallback demonstrated
+- Model pinning + checksum enforcement working
 
 ---
 
@@ -213,10 +213,10 @@ into:
 
 Crucially:
 
-* Intelligence is **allowed**
-* Autonomy is **constrained**
-* Evolution is **audited**
-* Deployment is **earned**
+- Intelligence is **allowed**
+- Autonomy is **constrained**
+- Evolution is **audited**
+- Deployment is **earned**
 
 ---
 
@@ -226,24 +226,23 @@ To support durable conversation history, workflow memory, and governed self-impr
 
 Suggested runtime DB:
 
-* `memory/tom_runtime.sqlite`
+- `memory/tom_runtime.sqlite`
 
 System-of-record entities:
 
-* `sessions`, `conversation_turns`
-* `workflow_runs`, `workflow_steps`, `task_events`
-* `skills_learned`
-* `behavior_profiles`, `personality_profiles`
-* `skill_to_logic_proposals`, `validation_results`, `approvals`, `deploy_outcomes`
+- `sessions`, `conversation_turns`
+- `workflow_runs`, `workflow_steps`, `task_events`
+- `skills_learned`
+- `behavior_profiles`, `personality_profiles`
+- `skill_to_logic_proposals`, `validation_results`, `approvals`, `deploy_outcomes`
 
 Design note:
 
-* Vector DB remains retrieval-focused.
-* Runtime DB is chronology/governance-focused.
+- Vector DB remains retrieval-focused.
+- Runtime DB is chronology/governance-focused.
 
 Reference schema:
 
-* `../reference/Runtime_Memory_DB_Schema_v1.md`
+- `../reference/Runtime_Memory_DB_Schema_v1.md`
 
 ---
-

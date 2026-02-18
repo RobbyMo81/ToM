@@ -86,6 +86,10 @@ When watched files change, ToM updates an auto-generated snapshot section in `wh
   ```bash
   npm run ingest
   ```
+- Initialize runtime memory DB schema:
+  ```bash
+  npm run runtime:init
+  ```
 - Semantic query:
   ```bash
   npm run query -- "What lessons did I record about SSH hardening?"
