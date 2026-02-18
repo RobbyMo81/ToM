@@ -1,0 +1,6 @@
+node_modules/
+dist/
+.env
+memory/*.sqlite
+memory/web/
+*.log
