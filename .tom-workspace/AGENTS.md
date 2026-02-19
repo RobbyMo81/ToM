@@ -16,7 +16,14 @@ Before doing anything else:
 4. Read `memory/YYYY-MM-DD.md` (today + yesterday) for recent context
 5. **If in MAIN SESSION** (direct chat with your human): Also read `MEMORY.md`
 
-Don't ask permission. Just do it.
+For this startup checklist, don't ask permission. Just do it.
+
+## Agent Base Languages
+
+- **ToM Agent**: primary runtime and integration surface is written in
+  TypeScript.
+- **O.X.I.D.E Agent**: primary subsystem/runtime implementation is written in
+  Rust.
 
 ## Memory
 
@@ -25,7 +32,31 @@ You wake up fresh each session. These files are your continuity:
 - **Daily notes:** `memory/YYYY-MM-DD.md` (create `memory/` if needed) — raw logs of what happened
 - **Long-term:** `MEMORY.md` — your curated memories, like a human's long-term memory
 
+System memory/database definitions (authoritative):
+
+- `sql\\001_runtime_memory_v1.sql` = institutional and researched knowledge
+  schema source, aggregated from:
+  - `./docs/build`
+  - `./docs/debriefs`
+  - `./docs/handoffs`
+  - `./docs/lessons`
+  - `./docs/plans`
+- `memory\\tom_brain.sqlite` = Chroma-style long-term AI/LLM memory store
+  (Python-managed) for ToM SOPs, self-improvement plans, and information in
+  `docs\\reference`; this is the long-term ToM↔O.X.I.D.E planning and
+  enhancement communication channel.
+- `memory\\tom_runtime.sqlite` = session communications between ToM, Users,
+  and O.X.I.D.E; not primary long-term memory, but may hold persistent memory.
+  Compact after 250,000 tokens.
+- Compacted memories are stored in long-term memory at
+  `memory\\tom_runtime.sqlite`.
+- O.X.I.D.E automation alignment index: `automation/README.md`
+  (ownership, scope, and SOP traceability contract).
+
 Capture what matters. Decisions, context, things to remember. Skip the secrets unless asked to keep them.
+
+Do not manually edit SQLite runtime files unless explicitly performing controlled
+migration/recovery work.
 
 ### 🧠 MEMORY.md - Your Long-Term Memory
 
@@ -41,9 +72,32 @@ Capture what matters. Decisions, context, things to remember. Skip the secrets u
 
 - **Memory is limited** — if you want to remember something, WRITE IT TO A FILE
 - "Mental notes" don't survive session restarts. Files do.
-- When someone says "remember this" → update `memory/YYYY-MM-DD.md` or relevant file
-- When you learn a lesson → update AGENTS.md, TOOLS.md, or the relevant skill
-- When you make a mistake → document it so future-you doesn't repeat it
+- Use the existing `./docs` structure for project artifacts (do not drop new
+  project notes in repo root):
+  - `docs/plans/` for implementation plans and checklists
+  - `docs/debriefs/` for post-work summaries and verification outcomes
+  - `docs/lessons/` for lessons learned and retrospective notes
+  - `docs/handoffs/` for handoff and transition summaries
+  - `docs/reference/` for ToM and O.X.I.D.E-specific memory snapshots,
+    inventories, and reference material only
+  - `docs/build/` for build templates and build-specific guidance
+- When someone says "remember this" → trigger a required memory action:
+  1. Create a detailed markdown memory note in `./memory/` (use a
+     timestamped filename, e.g., `memory/YYYY-MM-DD-topic.md`).
+  2. Also write a corresponding reference memory note in
+     `./docs/reference/` (same date/topic naming pattern).
+  3. Persist that memory into long-term memory by running the normal ingestion
+     path so it is written to `memory\\tom_brain.sqlite`.
+- When you learn a lesson → trigger a required lesson action:
+  1. Update AGENTS.md, TOOLS.md, or the relevant skill.
+  2. Generate a markdown lesson file using `memory/YYYY-MM-DD.md` timestamped filename
+     pattern and save it in `./docs/debriefs/`.
+  3. Also save a corresponding reference copy in `./docs/reference/`.
+- When you make a mistake → document it in `docs/reference/` so future-you
+  doesn't repeat it again. Be brutally honest. This is how you learn and improve.
+- When you have an insight → write it down in `docs/reference/` so future-you can benefit from it. Don't let good ideas slip away. Capture them for later reflection and action.
+- When you make a decision → document the decision, the reasoning behind it, and any alternatives you considered in `docs/reference/`. This creates an audit trail for future reference and helps you learn from your choices.
+- When you complete a significant task or project → write a debrief in `docs/debriefs/` summarizing what you did, what went well, what challenges you faced, and what you learned. This helps consolidate your experience and creates a record for future reference.
 - **Text > Brain** 📝
 
 ## Safety
@@ -117,6 +171,13 @@ Reactions are lightweight social signals. Humans use them constantly — they sa
 ## Tools
 
 Skills provide your tools. When you need one, check its `SKILL.md`. Keep local notes (camera names, SSH details, voice preferences) in `TOOLS.md`.
+
+Shared visibility requirement:
+
+- `./tools/` and `./skills/` are shared directories and must remain visible to
+  both ToM and O.X.I.D.E.
+- Do not isolate these paths per-agent; both agents read/write from the same
+  canonical workspace locations.
 
 **🎭 Voice Storytelling:** If you have `sag` (ElevenLabs TTS), use voice for stories, movie summaries, and "storytime" moments! Way more engaging than walls of text. Surprise people with funny voices.
 
@@ -192,7 +253,8 @@ You are free to edit `HEARTBEAT.md` with a short checklist or reminders. Keep it
 - Read and organize memory files
 - Check on projects (git status, etc.)
 - Update documentation
-- Commit and push your own changes
+- Commit your own changes locally
+- Ask before pushing to remote (push leaves the machine)
 - **Review and update MEMORY.md** (see below)
 
 ### 🔄 Memory Maintenance (During Heartbeats)

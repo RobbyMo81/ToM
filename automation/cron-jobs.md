@@ -1,5 +1,10 @@
 ---
 summary: "Cron jobs + wakeups for the Gateway scheduler"
+owner: "O.X.I.D.E"
+scope: "Automation SOP (runtime operations; excluded from vector memory)"
+architecture_alignment:
+  topology_phase: "planning"
+  role: "technical subsystem"
 read_when:
   - Scheduling background jobs or wakeups
   - Wiring automation that should run with or alongside heartbeats

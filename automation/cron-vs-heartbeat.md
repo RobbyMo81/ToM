@@ -1,11 +1,17 @@
 ---
+
 summary: "Guidance for choosing between heartbeat and cron jobs for automation"
+owner: "O.X.I.D.E"
+scope: "Automation SOP (runtime operations; excluded from vector memory)"
+architecture_alignment:
+topology_phase: "planning"
+role: "technical subsystem"
 read_when:
-  - Deciding how to schedule recurring tasks
-  - Setting up background monitoring or notifications
-  - Optimizing token usage for periodic checks
-title: "Cron vs Heartbeat"
----
+
+- Deciding how to schedule recurring tasks
+- Setting up background monitoring or notifications
+- Optimizing token usage for periodic checks
+  title: "Cron vs Heartbeat"
 
 # Cron vs Heartbeat: When to Use Each
 

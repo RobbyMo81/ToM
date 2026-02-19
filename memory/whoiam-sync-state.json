@@ -1,16 +1,16 @@
 {
-  "lastSyncedAt": "2026-02-18T16:16:02.934Z",
+  "lastSyncedAt": "2026-02-19T00:08:16.704Z",
   "fileHashes": {
-    "src/index.ts": "1e757afe4c0c3243fc09a469ae8f6cd7732a7643351986f04b5b2ad46100c2d9",
-    "src/core/config.ts": "6f62e0d0cf5b223d180ffcbec24ca37528dfb1b3b05f502499075e8aca086355",
-    "src/core/brain.ts": "a1bdd3253f64af428b1cacbfd1af532d08fe246845fa03a577cfb9c9ceb11708",
-    "src/integrations/knowledgeLoader.ts": "192c01278fb6039acb56b5c5c69b132afe913a63f5811a70a25879d08a840fe4",
-    "src/integrations/vectorStore.ts": "9b8938e16b91f69f9199489b922e94c52acd81f7edd49983983c02415cfaebd2",
-    "src/api/httpServer.ts": "1fbe63a77f36a8c55599afc6d4275054c9afe5a743daa5f50bb27e1ad602bdb6",
-    "src/jobs/cycleJob.ts": "cb3e6715d979c86856bd15f0918457a1a5df0f65b4fe548d7d8eb40ff420d664",
-    "src/jobs/githubSyncJob.ts": "1baf6b07df26a7e4c6e11f466cfd3b871ede198d17652dd40aa6b73834680762",
-    "src/integrations/githubReportSync.ts": "9ee906ffd1e4c20fbf7b42e845be8230bcb07ec5c1f2344aa5117b9e7d7b24c4",
-    "package.json": "19f60287f3109f2a29436d8f9caccbbfe265a98633068191aed5a8c5cf9cb2d7",
-    "README.md": "4db0701197c7465b934128c429618e27f9457900d1ca72f519d86e7577fee3f9"
+    "src/index.ts": "5a3348551d2bfe7bc04046d94d0fd09112c23b543b32f893fca000948aaf0aaa",
+    "src/core/config.ts": "399bf5b498c1c0cd412ed73d0d5780e0c8f8311ef2fb5cf70b653c0347136258",
+    "src/core/brain.ts": "02273bff291b36ee707fdd6f610c10c5045c8052269343b0167ca14a0e1b3bc8",
+    "src/integrations/knowledgeLoader.ts": "8776f197ac4eef53c08c6e308545fc887d15ec0503d4f1b43f517f2452bf45a3",
+    "src/integrations/vectorStore.ts": "f00b9175bec887bc7981923534fc2c6e02984c50994c615718de5c6f5e73cf4b",
+    "src/api/httpServer.ts": "aaac6e8d900a5d606dbb64061ac9d70321dd0e534f17c8bde79eeef4d6b5420f",
+    "src/jobs/cycleJob.ts": "0f387a4ac41aa8c841f5c51753dded7734a59dd2eda161fa13fd0027f544da73",
+    "src/jobs/githubSyncJob.ts": "da021b9721076d8b6db01b053805817d168faeec79a82f8e766dcdf034a42aed",
+    "src/integrations/githubReportSync.ts": "49384c8df49781f378f0f88c0f5d22576bf6a4b98f81ce69b1222de24619d2ad",
+    "package.json": "e9fe548bf143ce8eb74205ed6801f91eda8ec33e38ef899c28216a430aa721f4",
+    "README.md": "f86f77fc412c73d9ef3f4eec78ee8cbd01f984eb1e9cde6ae546a682f5c53522"
   }
 }

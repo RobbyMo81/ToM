@@ -1,0 +1,4 @@
+docs/debriefs/Lineage_Workflow_Closeout_Debrief_2026-02-18.md
+docs/plans/Plan-Agent_Instructions_LLM.md
+docs/reference/Repo_Structure_Snapshot_2026-02-18.md
+src/scripts/lineageSmoke.ts

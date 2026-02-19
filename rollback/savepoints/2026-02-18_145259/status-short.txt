@@ -1,0 +1,21 @@
+ M .github/workflows/ci.yml
+ M README.md
+ M automation/github-report.md
+ M "docs/handoffs/Handoff Report.md"
+ M package.json
+ M packages/tom-brain-sdk/src/index.ts
+ M packages/tom-brain-sdk/src/tomBrainClient.ts
+ M packages/tom-brain-sdk/src/types.ts
+ M src/api/httpServer.ts
+ M src/cli.ts
+ M src/core/brain.ts
+ M src/integrations/runtimeMemoryStore.ts
+ M src/jobs/cycleJob.ts
+ M src/sdk/index.ts
+ M src/sdk/tomBrainClient.ts
+ M src/sdk/types.ts
+?? docs/debriefs/Lineage_Workflow_Closeout_Debrief_2026-02-18.md
+?? docs/plans/Plan-Agent_Instructions_LLM.md
+?? docs/reference/Repo_Structure_Snapshot_2026-02-18.md
+?? rollback/
+?? src/scripts/lineageSmoke.ts

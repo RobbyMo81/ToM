@@ -22,15 +22,16 @@ It classifies files into your three domains:
 Local ingestion now includes:
 
 - project documentation in `docs/**/*.md`
-- automation SOP runbooks in `automation/**/*.md`
 
 Local ingestion explicitly excludes:
 
+- root markdown files (`*.md`)
+- automation SOP runbooks (`automation/**/*.md`)
 - `.tom-workspace/**` (governance/identity/behavior context only; not vectorized)
 
 Operational source tags are added automatically for retrieval quality:
 
-- automation SOP docs: `sop`, `automation`, `autonomy`, `runbook`, `operations`, `task-execution`
+- automation SOP docs are intentionally excluded from vector memory under the current planning-mode policy.
 
 ## Predetermined Cycle of Operations
 
@@ -40,6 +41,11 @@ Every cron run (`TOM_CRON_SCHEDULE`) executes:
 2. **Local Ingestion**: scan + incrementally index changed docs
 3. **Web Enrichment**: run configured Brave queries and index snapshots
 4. **Memory Report**: return cycle metrics for orchestration/logging
+
+### Memory Roles
+
+- `memory/tom_brain.sqlite` = long-term memory for retrieval knowledge.
+- `memory/tom_runtime.sqlite` = history context + current workflow memory.
 
 ## GitHub Report Sync Cron
 
@@ -114,6 +120,10 @@ When watched files change, ToM updates an auto-generated snapshot section in `wh
   ```bash
   npm run lint:all
   ```
+- Run lineage pagination smoke test (API must be running):
+  ```bash
+  npm run lineage:smoke
+  ```
 - Start cron scheduler:
   ```bash
   npm run build
@@ -130,6 +140,18 @@ Use the one-task planning template for all future build efforts:
 
 - `docs/build/Build_OneTask_Template.md`
 
+Methodology gold standard for promoting plans to implementations:
+
+- `docs/reference/ToM_Methodology_Standard.md`
+
+Mandatory usage scope:
+
+- upgrades
+- enhancements
+- builds
+- tool creation
+- skill creation
+
 This template ensures each build includes:
 
 - must-have requirements
@@ -138,6 +160,8 @@ This template ensures each build includes:
 - CI/policy requirements
 - external action ownership
 - debrief-ready verification logs
+
+Any implementation plan is considered non-compliant unless it references and follows the methodology standard.
 
 ## Git Hooks
 
@@ -164,6 +188,10 @@ See detailed commit guide: `.github/COMMIT_CONVENTION.md`
   - `npm ci`
   - `npm run build`
   - `npm run lint:all`
+- Optional non-blocking integration job:
+  - `lineage-smoke` (runs `npm run lineage:smoke` against live API)
+  - Enable by setting repository variable `CI_ENABLE_INTEGRATION_SMOKE=true`
+  - Or run manually via `workflow_dispatch` with `run_integration_smoke=true`
 
 Recommended GitHub repo settings follow-up:
 
@@ -188,6 +216,8 @@ By default the API binds to `127.0.0.1:8787`.
 
 - `GET /health` → service heartbeat
 - `GET /stats` → vector count
+- `GET /lineage/latest` → latest workflow + proposal lifecycle summary
+- `GET /lineage/runs?limit=20&order=asc&cursor=<cursor>&status=succeeded&triggerSource=cron&startedAfter=2026-02-18T00:00:00.000Z&startedBefore=2026-02-18T23:59:59.999Z` → recent workflow lineage history with optional filters and cursor pagination
 - `POST /query` with JSON body `{ "question": "...", "topK": 8 }`
 - `POST /generate` with JSON body `{ "question": "...", "topK": 8 }`
 - `POST /ingest` → run local markdown ingestion
@@ -209,6 +239,30 @@ curl -X POST http://127.0.0.1:8787/query \
 curl -X POST http://127.0.0.1:8787/generate \
   -H "Content-Type: application/json" \
   -d '{"question":"Summarize what I learned about SSH hardening.","topK":6}'
+```
+
+```bash
+curl http://127.0.0.1:8787/lineage/latest
+```
+
+```bash
+curl "http://127.0.0.1:8787/lineage/runs?limit=20"
+```
+
+```bash
+curl "http://127.0.0.1:8787/lineage/runs?limit=20&order=asc"
+```
+
+```bash
+curl "http://127.0.0.1:8787/lineage/runs?limit=20&order=desc&cursor=2026-02-18T20:00:00.514Z|a1a3540a-0b6f-4614-ba14-7701a6ad866b"
+```
+
+```bash
+curl "http://127.0.0.1:8787/lineage/runs?limit=20&status=succeeded&triggerSource=cron"
+```
+
+```bash
+curl "http://127.0.0.1:8787/lineage/runs?limit=20&order=asc&status=succeeded&triggerSource=cron&startedAfter=2026-02-18T00:00:00.000Z&startedBefore=2026-02-18T23:59:59.999Z"
 ```
 
 ### Optional auth
@@ -239,6 +293,23 @@ const client = new ToMBrainClient({
 
 const health = await client.health();
 const stats = await client.stats();
+const lineage = await client.lineageLatest();
+const lineageRuns = await client.lineageRuns({
+  limit: 20,
+  order: "asc",
+  status: "succeeded",
+  triggerSource: "cron",
+  startedAfter: "2026-02-18T00:00:00.000Z",
+  startedBefore: "2026-02-18T23:59:59.999Z",
+});
+
+const nextPage = lineageRuns.page.nextCursor
+  ? await client.lineageRuns({
+      limit: 20,
+      order: "asc",
+      cursor: lineageRuns.page.nextCursor,
+    })
+  : null;
 const query = await client.query("What lessons did I record about SSH hardening?", 6);
 const generated = await client.generate("Summarize what I learned about SSH hardening.", 6);
 ```

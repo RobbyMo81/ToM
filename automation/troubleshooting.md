@@ -1,5 +1,10 @@
 ---
 summary: "Troubleshoot cron and heartbeat scheduling and delivery"
+owner: "O.X.I.D.E"
+scope: "Automation SOP (runtime operations; excluded from vector memory)"
+architecture_alignment:
+  topology_phase: "planning"
+  role: "technical subsystem"
 read_when:
   - Cron did not run
   - Cron ran but no message was delivered

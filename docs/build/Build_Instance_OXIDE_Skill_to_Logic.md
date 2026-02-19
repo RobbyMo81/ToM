@@ -17,7 +17,14 @@
 - Owner: ToM Engineering
 - Related Issue/Request: Convert learned skills into safely governed code/config proposals
 - Target Branch: main
-- Last Updated: 2026-02-18
+- Last Updated: 2026-02-19
+
+### 0.1) Promotion Record
+
+- Promoted On: 2026-02-19
+- Promoted By: ToM Engineering
+- Promotion Basis: ToM Methodology Standard v1.1+
+- Promotion State: promoted
 
 ---
 
@@ -38,17 +45,17 @@ Define a governed pipeline where ToM can transform newly learned skills into can
 
 ## 2) Requirements Matrix (Must-Have)
 
-| Req ID | Requirement                                                                                            | Scope (files/systems)                                        | Validation Command                   | Evidence Artifact                              | Status      |
-| ------ | ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------ | ---------------------------------------------- | ----------- |
-| R-001  | Define end-to-end skill-to-logic workflow states (`discover → propose → validate → approve → promote`) | O.X.I.D.E architecture docs                                  | `npm run lint:md`                    | workflow state diagram + sequence section      | Not Started |
-| R-002  | Define O.X.I.D.E helper-agent responsibilities and limits                                              | `docs/plans/Plan-O.X.I.D.E_archeticture.md`, this build plan | `npm run lint:md`                    | role contract matrix (host brain vs O.X.I.D.E) | Not Started |
-| R-003  | Define deterministic proposal format (structured JSON patch intent)                                    | proposed schema docs + policy docs                           | schema validation dry-run command    | sample proposal payloads                       | Not Started |
-| R-004  | Define CI validation contract for proposals                                                            | GitHub workflow + local scripts                              | `npm run build && npm run lint:all`  | required checks list + pass/fail rules         | Not Started |
-| R-005  | Define risk/policy gate levels and escalation paths                                                    | policy module design docs                                    | policy simulation script (future)    | risk classification matrix + approvals table   | Not Started |
-| R-006  | Define safe fallback/no-op behavior when Ollama or policy services fail                                | O.X.I.D.E runtime behavior spec                              | failure-mode tabletop tests (future) | fail-safe decision table                       | Not Started |
-| R-007  | Define observability/audit requirements for each stage                                                 | telemetry/audit docs                                         | lint/docs checks                     | audit event schema + examples                  | Not Started |
-| R-008  | Produce rough-draft implementation backlog by phase                                                    | planning/TODO artifacts                                      | lint/docs checks                     | prioritized phase backlog                      | Not Started |
-| R-009  | Define shared runtime SQL memory schema including behavior/personality state                           | `docs/reference/Runtime_Memory_DB_Schema_v1.md`              | `npm run lint:md`                    | reviewed DDL + entity coverage map             | Not Started |
+| Req ID | Requirement                                                                                            | Scope (files/systems)                                                      | Validation Command                  | Evidence Artifact                               | Status      |
+| ------ | ------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------- | ----------------------------------- | ----------------------------------------------- | ----------- |
+| R-001  | Define end-to-end skill-to-logic workflow states (`discover → propose → validate → approve → promote`) | `docs/plans/Plan-O.X.I.D.E_archeticture.md`, `src/core/oxideGovernance.ts` | `npm run lint:md`                   | state diagram + canonical workflow interfaces   | Complete    |
+| R-002  | Define O.X.I.D.E helper-agent responsibilities and limits                                              | `docs/plans/Plan-O.X.I.D.E_archeticture.md`, `src/core/oxideGovernance.ts` | `npm run lint:md`                   | dual-brain role contract matrix + authority map | Complete    |
+| R-003  | Define deterministic proposal format (structured JSON patch intent)                                    | `src/core/oxideGovernance.ts`, proposal payload lifecycle                  | `npm run oxide:validate-proposal`   | typed payload + schema validator                | Complete    |
+| R-004  | Define CI validation contract for proposals                                                            | GitHub workflow + local scripts                                            | `npm run build && npm run lint:all` | required checks list + pass/fail rules          | In Progress |
+| R-005  | Define risk/policy gate levels and escalation paths                                                    | `src/core/oxideGovernance.ts`, policy decisions in cycle                   | `npm run oxide:policy-sim`          | deterministic risk/policy simulation output     | In Progress |
+| R-006  | Define safe fallback/no-op behavior when Ollama or policy services fail                                | `src/core/brain.ts`, O.X.I.D.E runtime behavior spec                       | `npm run oxide:policy-sim`          | blocked promotion path when policy fails        | In Progress |
+| R-007  | Define observability/audit requirements for each stage                                                 | telemetry/audit docs + runtime lineage store                               | `npm run lint:all`                  | workflow/proposal/validation lineage events     | In Progress |
+| R-008  | Produce rough-draft implementation backlog by phase                                                    | `docs/plans/Plan-OXIDE_Implementation_Backlog.md`                          | `npm run lint:md`                   | ticketed phase backlog with dependencies        | Complete    |
+| R-009  | Define shared runtime SQL memory schema including behavior/personality state                           | `docs/reference/Runtime_Memory_DB_Schema_v1.md`                            | `npm run lint:md`                   | reviewed DDL + entity coverage map              | Not Started |
 
 Status values: Not Started / In Progress / Complete / Blocked
 
@@ -81,8 +88,8 @@ Define required checks for this build.
 - Format Check: `npm run format:check`
 - Aggregate Gate: `npm run lint:all`
 - Additional test/smoke commands:
-  - Dry-run proposal schema validation (future command: `npm run oxide:validate-proposal -- --dry-run`)
-  - Dry-run policy decision simulation (future command: `npm run oxide:policy-sim`)
+  - Dry-run proposal schema validation: `npm run oxide:validate-proposal`
+  - Dry-run policy decision simulation: `npm run oxide:policy-sim`
 
 Pass criteria:
 
@@ -160,26 +167,69 @@ Track actions that cannot be completed by code edits alone.
 
 Record exact commands and outcomes.
 
-- `npm run build` → PENDING
-- `npm run lint:all` → PENDING
-- `npm run lint:md` → PENDING
-- `npm run format:check` → PENDING
+- `npm run build` → PASS (2026-02-19)
+- `npm run lint:all` → PASS (2026-02-19)
+- `npm run lint:md` → PASS (2026-02-19)
+- `npm run format:check` → PASS (via `lint:all`, 2026-02-19)
+- `npm run oxide:validate-proposal` → PASS (2026-02-19)
+- `npm run oxide:policy-sim` → PASS (nominal pass + zero-index block, 2026-02-19)
+- `npm run lint:md -- docs/plans/Plan-O.X.I.D.E_archeticture.md docs/build/Build_Instance_OXIDE_Skill_to_Logic.md` → PASS (2026-02-19)
+- `npm run lint:md -- docs/plans/Plan-OXIDE_Implementation_Backlog.md docs/plans/Plan-O.X.I.D.E_archeticture.md docs/build/Build_Instance_OXIDE_Skill_to_Logic.md` → PASS (2026-02-19)
+- `npm run build && npm run lint:all` → PASS after `src/core/identityBinder.ts` add (2026-02-19)
+- `npm run build && npm run lint:all` → PASS after `src/core/brain.ts` identity binding in `runCycle/query/generate` (2026-02-19)
+- `npm run build && npm run lint:all` → PASS after lineage identity surfacing (`src/integrations/runtimeMemoryStore.ts`, SDK types) (2026-02-19)
+- `npm run build && npm run lint:all` → PASS after role-routing policy enforcement (`src/core/oxideGovernance.ts`, `src/core/brain.ts`) (2026-02-19)
+- `npm run build && npm run lint:all` → PASS after strict identity fail-closed guard (`src/core/identityBinder.ts`, `src/core/brain.ts`) (2026-02-19)
+- `npm run build && npm run lint:all` → PASS after lineage/task event annotations (`role`, `stage`, `authority`, `decisionRationale`) (2026-02-19)
+- `npm run rust:check && npm run rust:lint` → PASS after Rust Ollama adapter config caps (`oxide-brain/src/ollama/mod.rs`) (2026-02-19)
+- `cargo test --manifest-path oxide-brain/Cargo.toml` → PASS (2 adapter unit tests) (2026-02-19)
+- `cargo test --manifest-path oxide-brain/Cargo.toml` → PASS (safe-mode fallback tests included) (2026-02-19)
+- `cargo test --manifest-path oxide-brain/Cargo.toml` → PASS (telemetry fields validated for success/failure outcomes) (2026-02-19)
+- `npm run build && npm run lint:all && npm run oxide:validate-proposal && npm run oxide:policy-sim && npm run rust:check && npm run rust:lint && cargo test --manifest-path oxide-brain/Cargo.toml && npm run lint:md -- docs/plans/Plan-OXIDE_Implementation_Backlog.md docs/build/Build_Instance_OXIDE_Skill_to_Logic.md` → PASS (consolidated P4-001 evidence capture, 2026-02-19)
+
+## 9.1) Final Go/No-Go Decision (P4-003)
+
+- Decision: **NO-GO** (2026-02-19)
+- Decision Owner: Repo Admin (recorded by ToM Engineering)
+- Rationale:
+  - Must-have requirements are not fully complete (`R-004`, `R-005`, `R-006`, `R-007`, `R-009`).
+  - External governance actions remain pending (`EA-001` through `EA-004`).
+  - Definition-of-Done checklist is not yet fully satisfied.
+- Next actions before GO:
+  - Close remaining requirements and update their evidence artifacts.
+  - Complete external action verification with owners.
+  - Re-run consolidated evidence command and reassess gate.
 
 ---
 
 ## 10) Completion Matrix (Plan → TODO → Evidence)
 
-| Plan Area                    | TODO/Task Ref | Status      | Evidence                                |
-| ---------------------------- | ------------- | ----------- | --------------------------------------- |
-| Workflow state machine       | R-001         | Not Started | architecture flow diagram               |
-| Dual-brain role contract     | R-002         | Not Started | authority matrix                        |
-| Proposal schema and examples | R-003         | Not Started | schema + sample proposals               |
-| CI policy gate definition    | R-004         | Not Started | workflow yaml + check names             |
-| Risk escalation design       | R-005         | Not Started | risk table + approvals                  |
-| Fallback/no-op logic         | R-006         | Not Started | failure-mode matrix                     |
-| Audit/telemetry plan         | R-007         | Not Started | event schema                            |
-| Phase backlog                | R-008         | Not Started | implementation milestone list           |
-| Runtime SQL memory schema    | R-009         | Not Started | v1 DDL with behavior/personality tables |
+| Plan Area                    | TODO/Task Ref | Status      | Evidence                                          |
+| ---------------------------- | ------------- | ----------- | ------------------------------------------------- |
+| Workflow state machine       | R-001         | Complete    | section 13.5.1 + `OXIDE_WORKFLOW_STAGES`          |
+| Dual-brain role contract     | R-002         | Complete    | section 13.5.2 + `OXIDE_ROLE_CONTRACTS`           |
+| Proposal schema and examples | R-003         | Complete    | `src/core/oxideGovernance.ts`                     |
+| CI policy gate definition    | R-004         | In Progress | build + lint gate evidence                        |
+| Risk escalation design       | R-005         | In Progress | `npm run oxide:policy-sim` output                 |
+| Fallback/no-op logic         | R-006         | In Progress | policy-block behavior in cycle flow               |
+| Audit/telemetry plan         | R-007         | In Progress | runtime lineage tables and task events            |
+| Phase backlog                | R-008         | Complete    | `docs/plans/Plan-OXIDE_Implementation_Backlog.md` |
+| Runtime SQL memory schema    | R-009         | Not Started | v1 DDL with behavior/personality tables           |
+
+Backlog execution progress:
+
+- OXIDE-P1-001 complete (`src/core/identityBinder.ts`)
+- OXIDE-P1-002 complete (`src/core/brain.ts`)
+- OXIDE-P1-003 complete (`src/integrations/runtimeMemoryStore.ts`, `src/sdk/types.ts`)
+- OXIDE-P2-001 complete (`src/core/oxideGovernance.ts`, `src/core/brain.ts`)
+- OXIDE-P2-002 complete (`src/core/identityBinder.ts`, `src/core/brain.ts`)
+- OXIDE-P2-003 complete (`src/core/brain.ts`, `src/integrations/runtimeMemoryStore.ts`, SDK types)
+- OXIDE-P3-001 complete (`oxide-brain/src/ollama/mod.rs`, `oxide-brain/src/lib.rs`)
+- OXIDE-P3-002 complete (`oxide-brain/src/ollama/mod.rs` safe-mode no-op fallback)
+- OXIDE-P3-003 complete (`oxide-brain/src/telemetry/mod.rs`, `oxide-brain/src/ollama/mod.rs`)
+- OXIDE-P4-001 complete (consolidated evidence run captured in section 9)
+- OXIDE-P4-002 complete (`docs/debriefs/OXIDE_Skill_to_Logic_Debrief.md`, `docs/handoffs/OXIDE_Skill_to_Logic_Handoff.md`)
+- OXIDE-P4-003 complete (NO-GO decision recorded in section 9.1; closeout remains pending)
 
 ---
 
@@ -190,14 +240,17 @@ Record exact commands and outcomes.
 - [ ] Recommendations implemented or explicitly deferred
 - [ ] CI reflects required checks
 - [ ] External actions listed with owners
-- [ ] Verification log completed
-- [ ] Debrief produced
+- [x] Verification log completed
+- [x] Debrief produced
+- [ ] Methodology standard compliance confirmed (`docs/reference/ToM_Methodology_Standard.md`)
+- [ ] Promotion Record completed and accurate
 
 ---
 
 ## 12) Debrief Output
 
-- Debrief filename: `../debriefs/OXIDE_Skill_to_Logic_Debrief.md`
+- Debrief filename: `../debriefs/OXIDE_Skill_to_Logic_Debrief.md` (produced)
+- Handoff filename: `../handoffs/OXIDE_Skill_to_Logic_Handoff.md` (produced)
 - Summary of delivered outcomes:
   - O.X.I.D.E-governed skill-to-logic promotion workflow defined
   - dual-brain authority boundaries formalized

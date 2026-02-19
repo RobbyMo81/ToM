@@ -1,0 +1,61 @@
+{
+  "name": "tom-brain",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "description": "ToM knowledge brain with local Ollama embeddings, SQLite vector storage, Brave web enrichment, and cron orchestration.",
+  "main": "dist/index.js",
+  "type": "commonjs",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint \"src/**/*.ts\" \"packages/**/*.ts\"",
+    "lint:fix": "eslint \"src/**/*.ts\" \"packages/**/*.ts\" --fix",
+    "lint:md": "markdownlint \"README.md\" \".github/**/*.md\" \".tom-workspace/**/*.md\" \"automation/**/*.md\" \"docs/**/*.md\"",
+    "format": "prettier \"src/**/*.ts\" \"packages/**/*.ts\" \"*.{json,cjs,mjs}\" \"README.md\" \".github/**/*.md\" \".tom-workspace/**/*.md\" \"automation/**/*.md\" \"docs/**/*.md\" --write",
+    "format:check": "prettier \"src/**/*.ts\" \"packages/**/*.ts\" \"*.{json,cjs,mjs}\" \"README.md\" \".github/**/*.md\" \".tom-workspace/**/*.md\" \"automation/**/*.md\" \"docs/**/*.md\" --check",
+    "lint:all": "npm run lint && npm run lint:md && npm run format:check",
+    "build:all": "npm run build && npm run build:sdk",
+    "build:sdk": "npm run -w @tom/brain-sdk build",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts",
+    "api": "tsx src/index.ts",
+    "sdk:example": "tsx src/sdk/example.ts",
+    "ingest": "tsx src/cli.ts ingest",
+    "runtime:init": "tsx src/scripts/initRuntimeMemory.ts",
+    "query": "tsx src/cli.ts query \"What did I learn about SSH hardening?\"",
+    "generate": "tsx src/cli.ts generate \"Summarize what I learned about SSH hardening.\"",
+    "cycle": "tsx src/cli.ts cycle",
+    "github:sync": "tsx src/cli.ts github-sync",
+    "whoiam:sync": "tsx src/cli.ts whoiam-sync",
+    "lineage:smoke": "tsx src/scripts/lineageSmoke.ts",
+    "query:api": "node -e \"fetch('http://127.0.0.1:8787/query',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({question:'What did I learn about SSH hardening?'})}).then(r=>r.text()).then(console.log)\"",
+    "prepare": "husky"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.8.1",
+    "dotenv": "^16.5.0",
+    "glob": "^11.0.1",
+    "node-cron": "^3.0.3"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^20.4.1",
+    "@commitlint/config-conventional": "^20.4.1",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^22.15.2",
+    "@types/node-cron": "^3.0.11",
+    "@typescript-eslint/eslint-plugin": "^8.56.0",
+    "@typescript-eslint/parser": "^8.56.0",
+    "eslint": "^10.0.0",
+    "eslint-config-prettier": "^10.1.8",
+    "husky": "^9.1.7",
+    "markdownlint-cli": "^0.47.0",
+    "prettier": "^3.8.1",
+    "tsx": "^4.20.0",
+    "typescript": "^5.8.3"
+  }
+}

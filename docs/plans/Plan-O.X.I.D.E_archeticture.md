@@ -1,3 +1,160 @@
+# Plan — O.X.I.D.E Architecture Promotion (Methodology Standard)
+
+- Date: 2026-02-18
+- Status: IN PROGRESS (Promoted to implementation planning)
+- Methodology Standard: `docs/reference/ToM_Methodology_Standard.md`
+- Scope: O.X.I.D.E architecture promotion from design intent to governed implementation path
+
+## Promotion Record
+
+- Promoted On: 2026-02-18
+- Promoted By: GitHub Copilot
+- Promotion Basis: `docs/reference/ToM_Methodology_Standard.md` v1.1
+- Promotion State: Plan promoted to implementation-planning format; execution remains IN PROGRESS
+
+---
+
+## 1) Research
+
+Current-state evidence (repo/runtime):
+
+- Rust subsystem scaffold exists at `oxide-brain/` with required module directories.
+- Runtime memory database and lineage entities are implemented in `memory/tom_runtime.sqlite` via SQL schema + runtime store wiring.
+- Topology-compliance and identity-binding implementation are not yet complete.
+
+Known gaps requiring implementation:
+
+- Identity Binder and role-specific prompt hardening in active execution paths.
+- Identity metadata persistence (`identityAgent`, `identitySourceHash`, `identityVersion`, `promptClass`) across lineage paths.
+- Full Rust/Ollama safety controls (whitelist, deterministic caps, retry/timeout/circuit breaker, safe mode).
+
+---
+
+## 2) Plan
+
+Objective:
+
+- Implement O.X.I.D.E as a bounded Rust cognitive subsystem under dual-brain governance, with auditable and deterministic promotion gates.
+
+Approach:
+
+- Use Section 13/14 technical specification in this document as normative architecture.
+- Execute through phased implementation gates aligned to topology compliance.
+- Promote only through policy + validation + lineage evidence, not by architecture declaration alone.
+
+Non-goals:
+
+- Unbounded autonomy.
+- Direct executive override by O.X.I.D.E.
+- Any model self-upgrade or policy self-mutation.
+
+---
+
+## 3) Verify
+
+Required logic gates before implementation promotion:
+
+- [ ] Assumptions validated against runtime behavior and current codebase.
+- [ ] Dependency readiness confirmed (Rust toolchain, Ollama availability, runtime DB pathing).
+- [ ] Policy constraints confirmed with governing topology and methodology standards.
+- [ ] Fallback and rollback paths confirmed.
+- [ ] Go/No-Go decision recorded for each phase.
+
+---
+
+## 4) Prerequisites
+
+- [ ] Current runtime state documented (before-state evidence).
+- [ ] Rollback savepoint created for tracked/untracked files.
+- [ ] Primary and fallback access paths verified.
+- [ ] Required stakeholder approvals recorded where policy requires human approval.
+
+---
+
+## 5) Success Criteria
+
+Promotion to implementation-complete requires all:
+
+- [ ] Identity Binder fully implemented and enforced in query/generate/cycle paths.
+- [ ] Role-specific prompt hardening active for ToM vs O.X.I.D.E.
+- [ ] Identity metadata fully persisted and queryable in lineage outputs.
+- [ ] O.X.I.D.E Rust subsystem implements deterministic Ollama controls and safe-mode fallback.
+- [ ] Cross-brain governance enforced (discover/propose/approve/deploy separation).
+- [ ] Validation, approval, and deployment outcomes auditable end-to-end.
+
+---
+
+## 6) To-Do List (Execution Plan)
+
+Phase 1 — Identity Binder Foundation
+
+- [x] Implement IdentityContext contract and binder service.
+- [x] Wire into query/generate/cycle execution paths.
+- [x] Persist identity metadata to session/workflow lineage context.
+
+Phase 2 — Enforcement + Governance Logging
+
+- [x] Enforce role routing policy boundaries.
+- [x] Add strict-mode guard behavior when identity binding is unavailable.
+- [x] Extend lineage visibility for identity context and prompt class tags.
+
+Phase 3 — O.X.I.D.E Rust Runtime Completion
+
+- [x] Rust crate/module scaffold present.
+- [x] Add Rust-side Ollama adapter with deterministic and security controls.
+- [x] Add safe-mode no-op behavior on inference failure.
+- [x] Add telemetry fields for determinism/retry/latency/correlation.
+
+Phase 4 — Promotion Evidence
+
+- [x] Build/lint/smoke evidence captured.
+- [x] Debrief and handoff updated with completion evidence.
+- [x] Final Go/No-Go recorded (NO-GO on 2026-02-19; plan remains IN PROGRESS until remaining gates pass).
+
+Execution backlog reference:
+
+- Ticketed phase backlog: `docs/plans/Plan-OXIDE_Implementation_Backlog.md`
+
+---
+
+## 7) Rollback Plan
+
+If any phase fails quality/policy gates:
+
+- Revert to last validated savepoint.
+- Disable or bypass incomplete feature paths behind guard flags.
+- Record failure cause and mitigation in debrief before re-attempt.
+
+Abort conditions:
+
+- Identity separation cannot be enforced.
+- Deterministic controls cannot be guaranteed.
+- Policy or audit trail requirements regress.
+
+---
+
+## 8) Monitoring & Validation
+
+Post-implementation monitoring window: minimum 48 hours.
+
+Required checks:
+
+- lineage integrity (`/lineage/latest`, `/lineage/runs`) includes required identity and governance context,
+- no unauthorized or unapproved promotion path observed,
+- deterministic controls remain active under normal and failure scenarios.
+
+---
+
+## 9) Lessons Learned
+
+- [ ] Record implementation debrief in `docs/debriefs/`.
+- [ ] Record operational handoff updates in `docs/handoffs/` when ownership changes.
+- [ ] Update methodology/process notes if new constraints are discovered.
+
+---
+
+## Technical Specification (Normative)
+
 # **O.X.I.D.E.** — Operational X-ray for Introspective Development & Enhancement
 
 - A **Rust-resident cognitive layer**
@@ -10,6 +167,70 @@ Below is the **CTO-level architectural amendment** to integrate that capability 
 ---
 
 # 13. Cognitive Layer Integration (Rust Brain + Ollama)
+
+## 13.0 Core Runtime Topology Alignment (Required)
+
+To align with the current runtime architecture, O.X.I.D.E enhancement must
+implement the Identity Binding flow exactly as the governing topology contract:
+
+```mermaid
+flowchart TD
+	subgraph Definitions [".agents/ (Logic & Role)"]
+		ToM_Role[ToM: Primary Executive]
+		OXIDE_Role[O.X.I.D.E: Technical Subsystem]
+	end
+
+	subgraph Entry ["System Entrypoint (src/index.ts)"]
+		A[index.ts] --> B[Initialize Services]
+	end
+
+	subgraph Workspace [".tom-workspace/ (The Mirror)"]
+		W1[whoiam.md]
+		W2[Identity Traits & Constraints]
+		W1 --> W2
+	end
+
+	subgraph Binding ["Identity Binding Layer"]
+		direction TB
+		B1[Load Workspace Traits]
+		B2[Inject System Prompt]
+
+		ToM_Role & W2 --> B1
+		OXIDE_Role & W2 --> B1
+		B1 --> B2
+	end
+
+	subgraph Execution ["Bound LLM Instances"]
+		B2 --> ToM_Instance["ToM (Bound to Persona)"]
+		B2 --> OXIDE_Instance["O.X.I.D.E (Bound to Helper Role)"]
+	end
+
+	subgraph Core ["Logic Engine (ToMBrain)"]
+		ToM_Instance --> F[runCycle]
+		OXIDE_Instance --> F
+		F --> G[Ollama Health]
+		F --> H[ingestKnowledge]
+	end
+
+	Definitions --> Entry
+	Entry --> Workspace
+	Workspace --> Binding
+	Binding --> Execution
+	Execution --> Core
+
+	style Binding fill:#fff3e0,stroke:#ff9800,stroke-width:2px
+	style ToM_Instance fill:#4A90E2,stroke:#fff,color:#fff
+	style OXIDE_Instance fill:#50E3C2,stroke:#333
+	style Workspace fill:#fff9c4,stroke:#fbc02d
+```
+
+Topology compliance requirements:
+
+- Identity traits must be loaded from `.tom-workspace/whoiam.md` before
+  ToM/O.X.I.D.E reasoning execution.
+- System prompt hardening must be role-specific (ToM vs O.X.I.D.E).
+- Runtime lineage must record active identity context for each execution path.
+- O.X.I.D.E must remain bounded to subsystem scope (no executive override).
 
 ## 13.1 Purpose of the O.X.I.D.E. Brain
 
@@ -115,6 +336,7 @@ Self-improvement must require **cross-brain agreement**:
 
 | Stage           | Required Authority              |
 | --------------- | ------------------------------- |
+| Identity bind   | Identity Binder (policy-bound)  |
 | Skill discovery | Host brain                      |
 | Patch proposal  | O.X.I.D.E. brain                |
 | Validation      | Deterministic CI                |
@@ -127,6 +349,44 @@ No single brain can:
 - Deploy
 
 This enforces **separation of cognitive powers**.
+
+## 13.5.1 Canonical Workflow State Machine (R-001)
+
+The governed promotion pipeline follows this fixed sequence:
+
+`discover → propose → validate → approve → promote`
+
+State ownership and transition constraints:
+
+- `discover` is initiated by ToM (host brain) from runtime learning signals.
+- `propose` is initiated by O.X.I.D.E with deterministic payload + schema checks.
+- `validate` must be executed by deterministic CI/runtime gates before approvals.
+- `approve` requires policy engine decision; human escalation is required for high/critical risk.
+- `promote` can only occur after successful validation + approval evidence.
+
+```mermaid
+stateDiagram-v2
+	[*] --> discover
+	discover --> propose: skill signal accepted
+	propose --> validate: schema + policy pre-check passed
+	validate --> approve: build/lint/test/policy PASS
+	validate --> [*]: reject on any gate fail
+	approve --> promote: policy approved
+	approve --> [*]: rejected
+	promote --> [*]: deployment outcome recorded
+```
+
+## 13.5.2 Dual-Brain Role Contract Matrix (R-002)
+
+| Role       | Responsibilities                                     | Allowed Stage(s) | Explicitly Disallowed                                    |
+| ---------- | ---------------------------------------------------- | ---------------- | -------------------------------------------------------- |
+| ToM        | Skill discovery, context synthesis, orchestration    | discover         | direct promote, policy override, unreviewed deployment   |
+| O.X.I.D.E  | Deterministic proposal synthesis, validation support | propose          | executive override, self-approval, autonomous deployment |
+| CI Runtime | Deterministic gate execution                         | validate         | authoring proposals, policy override                     |
+| Governance | Policy approval decisioning                          | approve          | bypassing failed validation gates                        |
+| Runtime DB | Promotion lineage recording                          | promote          | promoting without approval evidence                      |
+
+Code-facing interfaces for this matrix are defined in `src/core/oxideGovernance.ts` (`OXIDE_WORKFLOW_STAGES`, `OXIDE_ROLE_CONTRACTS`, `OXIDE_STAGE_AUTHORITIES`).
 
 ---
 
@@ -235,6 +495,11 @@ System-of-record entities:
 - `skills_learned`
 - `behavior_profiles`, `personality_profiles`
 - `skill_to_logic_proposals`, `validation_results`, `approvals`, `deploy_outcomes`
+- identity context metadata persisted with sessions/workflow context:
+  - `identityAgent`
+  - `identitySourceHash`
+  - `identityVersion`
+  - `promptClass`
 
 Design note:
 
@@ -244,5 +509,7 @@ Design note:
 Reference schema:
 
 - `../reference/Runtime_Memory_DB_Schema_v1.md`
+- `Plan-Topology_Compliance_Phase_Checklist.md` (phase gates and completion
+  protocol for topology compliance + O.X.I.D.E enhancement)
 
 ---

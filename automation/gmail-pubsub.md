@@ -1,5 +1,10 @@
 ---
 summary: "Gmail Pub/Sub push wired into OpenClaw webhooks via gogcli"
+owner: "O.X.I.D.E"
+scope: "Automation SOP (runtime operations; excluded from vector memory)"
+architecture_alignment:
+  topology_phase: "planning"
+  role: "technical subsystem"
 read_when:
   - Wiring Gmail inbox triggers to OpenClaw
   - Setting up Pub/Sub push for agent wake

@@ -2,6 +2,8 @@
 
 - Purpose: Ensure a single build task captures all required deliverables, quality gates, recommendations, evidence, and external actions.
 - Usage: Copy this file for each new build effort and complete every section before execution.
+- Methodology Standard (mandatory): `docs/reference/ToM_Methodology_Standard.md`
+- Policy: This template must be used in alignment with the methodology standard for upgrades, enhancements, builds, tool creation, and skill creation.
 
 ---
 
@@ -13,6 +15,13 @@
 - Related Issue/Request:
 - Target Branch:
 - Last Updated:
+
+### 0.1) Promotion Record
+
+- Promoted On:
+- Promoted By:
+- Promotion Basis: ToM Methodology Standard v1.1+
+- Promotion State: promoted | implementation complete
 
 ---
 
@@ -132,6 +141,8 @@ Record exact commands and outcomes.
 - [ ] External actions listed with owners
 - [ ] Verification log completed
 - [ ] Debrief produced
+- [ ] Methodology standard compliance confirmed (`docs/reference/ToM_Methodology_Standard.md`)
+- [ ] Promotion Record completed and accurate
 
 ---
 

@@ -1,5 +1,10 @@
 ---
 summary: "Hooks: event-driven automation for commands and lifecycle events"
+owner: "O.X.I.D.E"
+scope: "Automation SOP (runtime operations; excluded from vector memory)"
+architecture_alignment:
+  topology_phase: "planning"
+  role: "technical subsystem"
 read_when:
   - You want event-driven automation for /new, /reset, /stop, and agent lifecycle events
   - You want to build, install, or debug hooks

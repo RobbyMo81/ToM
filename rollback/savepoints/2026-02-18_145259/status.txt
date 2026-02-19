@@ -1,0 +1,32 @@
+On branch main
+Your branch is up to date with 'origin/main'.
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   .github/workflows/ci.yml
+	modified:   README.md
+	modified:   automation/github-report.md
+	modified:   docs/handoffs/Handoff Report.md
+	modified:   package.json
+	modified:   packages/tom-brain-sdk/src/index.ts
+	modified:   packages/tom-brain-sdk/src/tomBrainClient.ts
+	modified:   packages/tom-brain-sdk/src/types.ts
+	modified:   src/api/httpServer.ts
+	modified:   src/cli.ts
+	modified:   src/core/brain.ts
+	modified:   src/integrations/runtimeMemoryStore.ts
+	modified:   src/jobs/cycleJob.ts
+	modified:   src/sdk/index.ts
+	modified:   src/sdk/tomBrainClient.ts
+	modified:   src/sdk/types.ts
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	docs/debriefs/Lineage_Workflow_Closeout_Debrief_2026-02-18.md
+	docs/plans/Plan-Agent_Instructions_LLM.md
+	docs/reference/Repo_Structure_Snapshot_2026-02-18.md
+	rollback/
+	src/scripts/lineageSmoke.ts
+
+no changes added to commit (use "git add" and/or "git commit -a")

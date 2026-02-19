@@ -1,5 +1,10 @@
 ---
 summary: "Webhook ingress for wake and isolated agent runs"
+owner: "O.X.I.D.E"
+scope: "Automation SOP (runtime operations; excluded from vector memory)"
+architecture_alignment:
+  topology_phase: "planning"
+  role: "technical subsystem"
 read_when:
   - Adding or changing webhook endpoints
   - Wiring external systems into OpenClaw

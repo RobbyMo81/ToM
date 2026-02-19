@@ -41,13 +41,13 @@ function inferContextTags(relativePath: string): string[] {
 }
 
 export async function loadKnowledgeDocs(config: AppConfig): Promise<KnowledgeDocument[]> {
-  const patterns = ["docs/**/*.md", "automation/**/*.md"];
+  const patterns = ["docs/**/*.md"];
 
   const matches = await glob(patterns, {
     cwd: config.knowledgeDir,
     absolute: true,
     nodir: true,
-    ignore: ["node_modules/**", "dist/**", "memory/**", ".git/**", "packages/**"],
+    ignore: ["*.md", "automation/**/*.md", "node_modules/**", "dist/**", "memory/**", ".git/**", "packages/**"],
   });
 
   const docs: KnowledgeDocument[] = [];

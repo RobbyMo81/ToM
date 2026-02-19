@@ -1,76 +1,68 @@
-Agent Prompt — Run Hardening Verification Tests + Produce Report
-You will run a focused verification of the two hardening changes:
+# Handoff Report — Lineage Workflow Closeout
 
-Mounted secrets (fail-fast at gateway startup)
-Sandbox exec allowlist (argv required; shells denied)
-Constraints
-Do not introduce new code changes unless a test reveals a defect. If a defect is found, propose the minimal fix, but do not implement unless instructed.
-Do not print or log any secret values.
-Capture exact commands run and key output lines (redact secrets if present).
-Test Plan
-A) Pre-flight
-Confirm working tree status:
-git status --porcelain
-Confirm build passes:
-pnpm build
-B) Secrets: startup success case
-Create a temporary secrets directory on the host and mount/point the gateway at it.
+- Date: 2026-02-18
+- Branch: `main`
+- Status: Complete and ready for handoff
+- Primary artifacts:
+  - `docs/debriefs/Lineage_Workflow_Closeout_Debrief_2026-02-18.md`
+  - `docs/debriefs/ToM_Build_Debrief_2026-02-18.md`
+  - `README.md`
 
-Create 3 files with non-empty placeholder values:
-openai_api_key
-anthropic_api_key
-gemini_api_key
-Values must be dummy strings (do not use real keys).
-Start gateway with:
+## Scope Delivered
 
-OPENCLAW_SECRETS_DIR=<temp_dir> set in the gateway environment
-Start via the normal docker compose flow you’ve been using.
-Verify:
-Gateway container starts successfully
-Logs show normal startup (no missing secret errors)
-C) Secrets: fail-fast missing secret
-Stop gateway.
-Remove or rename exactly one required secret file (e.g., gemini_api_key).
-Start gateway again with the same OPENCLAW_SECRETS_DIR.
-Verify:
-Gateway fails immediately at startup
-Error message clearly indicates:
-which secret is missing/unreadable
-the expected full path
-mentions OPENCLAW_SECRETS_DIR
-Confirm no secret contents were printed.
-D) Sandbox exec: allow/deny
-Run sandboxed exec calls that cover:
+- Runtime memory persistence now records active query/generate interactions in CLI and API paths.
+- Cycle execution now records end-to-end lineage:
+  - workflow run/step/event history
+  - skill/proposal lifecycle
+  - validation/approval/deploy outcomes
+- Lineage read surfaces are implemented and documented:
+  - `GET /lineage/latest`
+  - `GET /lineage/runs` with filters and cursor pagination
+- SDK support was updated in both local and package clients.
+- Smoke testing support added via `npm run lineage:smoke`.
+- CI includes optional non-blocking `lineage-smoke` integration job.
 
-Allowed:
-argv=["python3","-V"]
-argv=["git","--version"]
-Denied:
-argv=["bash","-lc","whoami"] (must fail allowlist)
-A sandbox exec call without argv (must fail with “argv required” error)
-Document the exact invocation method used to issue sandbox exec calls (CLI, config, or internal test harness) and the observed outcomes.
+## Quality Gates and Evidence
 
-Final Deliverable (MANDATORY)
-At the end, output a single Markdown report titled:
+- `npm run build` → PASS
+- `npm run lint:all` → PASS
+- API lineage smoke execution → PASS
+- Runtime DB verification confirmed writes to lineage and governance tables.
 
-Hardening Verification Report (Mounted Secrets + Sandbox Exec Allowlist)
+## Operational Notes
 
-Include:
+- Required CI check remains `build-and-lint`.
+- Optional integration smoke activation:
+  - repository variable: `CI_ENABLE_INTEGRATION_SMOKE=true`, or
+  - manual dispatch input: `run_integration_smoke=true`.
+- Optional job is intentionally non-blocking (`continue-on-error: true`).
 
-Environment (OS, docker compose version, node/pnpm versions)
-Commands executed
-Results for each test (Pass/Fail)
-Key log excerpts (sanitized)
-If any failures: suspected root cause + minimal recommended fix (no implementation unless requested)
+## Policy Alignment Update
 
----
+- Date: 2026-02-18
+- Change: planning-mode vector-memory policy now excludes root markdown
+  (`*.md`) and automation SOP docs (`automation/**/*.md`).
+- Enforced by:
+  - `src/integrations/knowledgeLoader.ts` (ingest patterns + ignore rules)
+  - `README.md` (knowledge source policy)
+  - `.tom-workspace/whoiam.md` (system identity policy)
+- Operator note:
+  - existing indexed rows from prior policy may remain until the next ingest
+    convergence cycle
+  - run `npm run ingest` (or `npm run cycle`) to align active index state
 
-## Ollama Wiring Validation Closure (Delta)
+## Outstanding External Actions
 
-See also: `../debriefs/ToM_Build_Debrief_2026-02-18.md` for full build context and completion matrix.
+- If desired, enable optional integration smoke in repository settings.
+- If desired, make optional smoke blocking after sustained green history.
 
-- `npx tsx src/cli.ts query "openclaw"` → PASS
-- `npx tsx src/cli.ts generate "what did I learn about SSH hardening?"` → PASS
-- SDK smoke (`ToMBrainClient.generate`) → PASS
-- `POST /generate` endpoint smoke → PASS (HTTP 200)
-- `npm run lint:all` re-run after artifact updates → PASS
+## Recommended Next Increment (Optional)
+
+1. Add CI job summary output for lineage smoke pass/fail context.
+2. Expand smoke script to assert filtered query combinations.
+3. Add a lightweight contract test for lineage response shape stability.
+
+## Final Handoff Statement
+
+The workflow is closed with validated lineage functionality and operational
+documentation in place. No blocking defects are open in this scope.

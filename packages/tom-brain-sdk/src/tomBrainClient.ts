@@ -3,6 +3,9 @@ import {
   type GenerateResponse,
   type HealthResponse,
   type IngestResponse,
+  type LineageLatestResponse,
+  type LineageRunsQueryOptions,
+  type LineageRunsResponse,
   type QueryResponse,
   type StatsResponse,
   type ToMClientOptions,
@@ -30,6 +33,53 @@ export class ToMBrainClient {
 
   async stats(): Promise<StatsResponse> {
     return this.get<StatsResponse>("/stats");
+  }
+
+  async lineageLatest(): Promise<LineageLatestResponse> {
+    return this.get<LineageLatestResponse>("/lineage/latest");
+  }
+
+  async lineageRuns(options: number | LineageRunsQueryOptions = 20): Promise<LineageRunsResponse> {
+    const normalizedOptions: LineageRunsQueryOptions =
+      typeof options === "number"
+        ? {
+            limit: options,
+          }
+        : options;
+
+    const queryParams = new URLSearchParams();
+    if (typeof normalizedOptions.limit === "number") {
+      queryParams.set("limit", String(normalizedOptions.limit));
+    } else {
+      queryParams.set("limit", "20");
+    }
+
+    if (normalizedOptions.order === "asc" || normalizedOptions.order === "desc") {
+      queryParams.set("order", normalizedOptions.order);
+    }
+
+    if (typeof normalizedOptions.cursor === "string" && normalizedOptions.cursor.trim().length > 0) {
+      queryParams.set("cursor", normalizedOptions.cursor.trim());
+    }
+
+    if (typeof normalizedOptions.status === "string" && normalizedOptions.status.trim().length > 0) {
+      queryParams.set("status", normalizedOptions.status.trim());
+    }
+
+    if (typeof normalizedOptions.triggerSource === "string" && normalizedOptions.triggerSource.trim().length > 0) {
+      queryParams.set("triggerSource", normalizedOptions.triggerSource.trim());
+    }
+
+    if (typeof normalizedOptions.startedAfter === "string" && normalizedOptions.startedAfter.trim().length > 0) {
+      queryParams.set("startedAfter", normalizedOptions.startedAfter.trim());
+    }
+
+    if (typeof normalizedOptions.startedBefore === "string" && normalizedOptions.startedBefore.trim().length > 0) {
+      queryParams.set("startedBefore", normalizedOptions.startedBefore.trim());
+    }
+
+    const query = queryParams.toString();
+    return this.get<LineageRunsResponse>(`/lineage/runs?${query}`);
   }
 
   async query(question: string, topK?: number): Promise<QueryResponse> {

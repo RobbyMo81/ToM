@@ -1,5 +1,10 @@
 ---
 summary: "Poll sending via gateway + CLI"
+owner: "O.X.I.D.E"
+scope: "Automation SOP (runtime operations; excluded from vector memory)"
+architecture_alignment:
+  topology_phase: "planning"
+  role: "technical subsystem"
 read_when:
   - Adding or modifying poll support
   - Debugging poll sends from the CLI or gateway

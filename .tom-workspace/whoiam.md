@@ -22,10 +22,12 @@ ToM is a local-first knowledge brain with:
 - Localhost HTTP API
 - Workspace SDK (`@tom/brain-sdk`)
 - GitHub report sync cron
+- Runtime lifecycle lineage memory (sessions, workflow runs, proposals)
+- WhoAmI sync cron for living architecture state
 
 Knowledge policy:
 
-- Included in vector memory: root markdown + `automation/**/*.md`
+- Exclude in vector memory: root markdown + `automation/**/*.md`
 - Excluded from vector memory: `.tom-workspace/**` (governance, behavior, identity)
 
 ---
@@ -34,27 +36,88 @@ Knowledge policy:
 
 ```mermaid
 flowchart TD
-    A[src/index.ts] --> B[startCycleJob]
-    A --> C[startGitHubSyncJob]
-    A --> D[startHttpApi]
+   subgraph Definitions [".agents/ (Logic & Role)"]
+      ToM_Role[ToM: Primary Executive]
+      OXIDE_Role[O.X.I.D.E: Technical Subsystem]
+   end
 
-    B --> E[ToMBrain.runCycle]
-    E --> F[Ollama health check]
-    E --> G[ingestLocalKnowledge]
-    E --> H[enrichWithWebKnowledge]
+   subgraph Entry ["System Entrypoint (src/index.ts)"]
+      A[index.ts] --> B[Initialize Services]
+   end
 
-    G --> I[loadKnowledgeDocs]
-    I --> J[chunkDocument]
-    J --> K[Ollama embed]
-    K --> L[VectorStore upsert]
+   subgraph Workspace [".tom-workspace/ (The Mirror)"]
+      W1[whoiam.md]
+      W2[Identity Traits & Constraints]
+      W1 --> W2
+   end
 
-    C --> M[syncGitHubReport]
-    M --> N[automation/github-report.md]
-    M --> O[optional reindex]
+   subgraph Binding ["Identity Binding Layer"]
+      direction TB
+      B1[Load Workspace Traits]
+      B2[Inject System Prompt]
 
-    D --> P[/health /stats /query /ingest /cycle]
-    P --> E
+      ToM_Role & W2 --> B1
+      OXIDE_Role & W2 --> B1
+      B1 --> B2
+   end
+
+   subgraph Execution ["Bound LLM Instances"]
+      B2 --> ToM_Instance["ToM (Bound to Persona)"]
+      B2 --> OXIDE_Instance["O.X.I.D.E (Bound to Helper Role)"]
+   end
+
+   subgraph Core ["Logic Engine (ToMBrain)"]
+      ToM_Instance --> F[runCycle]
+      OXIDE_Instance --> F
+      F --> G[Ollama Health]
+      F --> H[ingestKnowledge]
+   end
+
+   Definitions --> Entry
+   Entry --> Workspace
+   Workspace --> Binding
+   Binding --> Execution
+   Execution --> Core
+
+   style Binding fill:#fff3e0,stroke:#ff9800,stroke-width:2px
+   style ToM_Instance fill:#4A90E2,stroke:#fff,color:#fff
+   style OXIDE_Instance fill:#50E3C2,stroke:#333
+   style Workspace fill:#fff9c4,stroke:#fbc02d
 ```
+
+### 2.1 Identity Bind Implementation Pattern
+
+To ensure the LLM cannot drift from identity constraints, the binding layer
+must follow this pattern:
+
+1. Trait Extraction
+   - `startWhoiamSyncJob` parses `whoiam.md` into a structured JSON object.
+2. System Prompt Hardening
+   - before any call to Ollama `/generate` or `/query`, the system prepends
+     identity traits.
+   - ToM receives the Executive/Strategic block.
+   - O.X.I.D.E receives the Subsystem/Operational block.
+3. Validation
+   - `RuntimeMemoryStore` lineage logs which identity was active during each
+     cycle or request, ensuring O.X.I.D.E does not perform ToM-level executive
+     overrides.
+
+### 2.2 Implementation Status (Planning vs Runtime)
+
+- Implemented
+  - Runtime lineage persistence and lifecycle tracking in ToM runtime DB.
+  - Lineage API visibility via `/lineage/latest` and `/lineage/runs`.
+  - WhoAmI sync scheduling and living-document update pipeline.
+- Partial
+  - Identity-oriented governance is documented, but explicit per-request
+    identity binding metadata is not yet enforced on all query/generate paths.
+- Planned (not yet implemented)
+  - Formal Identity Binder middleware that injects role-specific system prompts
+    before every LLM call.
+  - Role-separated runtime enforcement that guarantees ToM executive vs
+    O.X.I.D.E subsystem boundaries at execution time.
+  - Dedicated O.X.I.D.E localized Rust brain subsystem described in planning
+    docs.
 
 ---
 
@@ -65,6 +128,7 @@ flowchart TD
 1. `src/index.ts`
    - starts cycle cron
    - starts GitHub sync cron
+   - starts WhoAmI sync cron
    - starts HTTP API
 
 ### Cycle Path
@@ -89,9 +153,22 @@ flowchart TD
 2. endpoints:
    - `GET /health`
    - `GET /stats`
+   - `GET /lineage/latest`
+   - `GET /lineage/runs`
    - `POST /query`
+   - `POST /generate`
    - `POST /ingest`
    - `POST /cycle`
+
+### Runtime Lineage Path
+
+1. `src/core/brain.ts::runCycle(options)`
+2. `src/integrations/runtimeMemoryStore.ts`
+3. tables:
+   - `sessions`, `conversation_turns`
+   - `workflow_runs`, `workflow_steps`, `task_events`
+   - `skills_learned`, `skill_to_logic_proposals`
+   - `validation_results`, `approvals`, `deploy_outcomes`
 
 ---
 
@@ -102,6 +179,7 @@ flowchart TD
 ```ts
 startCycleJob();
 startGitHubSyncJob();
+startWhoiamSyncJob();
 startHttpApi();
 ```
 
@@ -115,7 +193,7 @@ this.vectors.purgeLocalDocumentsByPathPrefix(governanceDir);
 ### Included local patterns
 
 ```ts
-const patterns = ["*.md", "automation/**/*.md"];
+const patterns = ["docs/**/*.md"];
 ```
 
 ### GitHub report scheduler guard
@@ -154,6 +232,11 @@ Primary env controls:
 - `TOM_API_HOST`
 - `TOM_API_PORT`
 - `TOM_API_TOKEN`
+- `TOM_RUNTIME_DB_PATH`
+- `WHOIAM_SYNC_SCHEDULE`
+- `WHOIAM_DOC_PATH`
+- `WHOIAM_SYNC_STATE_PATH`
+- `WHOIAM_SYNC_WATCH_FILES`
 
 ---
 
@@ -198,7 +281,7 @@ flowchart LR
 
 ```mermaid
 graph TD
-    A[automation/*.md] --> B[Entity extraction]
+   A[docs/**/*.md] --> B[Entity extraction]
     B --> C[commands]
     B --> D[schedules]
     B --> E[event hooks]
@@ -232,7 +315,12 @@ sequenceDiagram
 
 - `.tom-workspace` is governance and identity layer.
 - It must remain non-vectorized to avoid retrieval leakage.
-- Automation runbooks in `automation/` are the SOP/autonomy execution layer.
+- Automation runbooks in `automation/` are the SOP/autonomy execution layer and
+  are currently excluded from vector memory under planning-mode policy.
+- O.X.I.D.E automation ownership and directory-level alignment contract are
+  documented in `automation/README.md` (traceability index).
+- `docs/reference/` is reserved for ToM and O.X.I.D.E-specific memory
+  artifacts only.
 - Any change to these boundaries must update:
   - `src/integrations/knowledgeLoader.ts`
   - `src/core/brain.ts` (purge behavior)
@@ -264,19 +352,58 @@ Recommended change block:
 - Backward compatibility notes:
 ```
 
+Enhancement completion protocol:
+
+- Follow `docs/plans/Plan-Topology_Compliance_Phase_Checklist.md` completion flow.
+- Once complete, update `2.2 Implementation Status (Planning vs Runtime)` and
+  `9) Current Build Snapshot` in this file to reflect final runtime state.
+- Mirror completion evidence in:
+  - `docs/debriefs/Lineage_Workflow_Closeout_Debrief_2026-02-18.md`
+  - `docs/handoffs/Handoff Report.md`
+
 ---
 
 ## 9) Current Build Snapshot
 
 - Runtime: TypeScript + Node 20+
-- Vector DB: SQLite (`memory/tom_brain.sqlite`)
+- Vector DB: SQLite (`memory\\tom_brain.sqlite`)
+- Runtime DB: SQLite (`memory\\tom_runtime.sqlite`)
 - Embeddings: Ollama (`nomic-embed-text`)
 - API: `127.0.0.1:8787`
 - Schedulers:
   - ToM cycle cron
   - GitHub report sync cron
+  - WhoAmI sync cron
 - SDK: `@tom/brain-sdk`
 - GitHub report output: `automation/github-report.md`
+- Lineage observability:
+  - `GET /lineage/latest`
+  - `GET /lineage/runs` (filters + cursor pagination)
+- Verification status:
+  - `npm run build` PASS
+  - `npm run lint:all` PASS
+  - `npm run lineage:smoke` available for API pagination smoke
+- Rollback readiness:
+  - savepoint created at `rollback/savepoints/2026-02-18_145259`
+
+### 9.1 Database Definitions (Aligned with AGENTS)
+
+- `sql\\001_runtime_memory_v1.sql` is the institutional and researched
+  knowledge schema source, aggregated from:
+  - `./docs/build`
+  - `./docs/debriefs`
+  - `./docs/handoffs`
+  - `./docs/lessons`
+  - `./docs/plans`
+- `memory\\tom_brain.sqlite` is the Chroma-style long-term AI/LLM memory
+  store (Python-managed) for ToM SOPs, self-improvement plans, and
+  `docs\\reference` content.
+- `memory\\tom_runtime.sqlite` is the session communication store between ToM,
+  Users, and O.X.I.D.E; it is not the primary long-term memory store but may
+  hold persistent memory.
+- Runtime compaction policy: compact after 250,000 tokens.
+- Compacted memories are stored in long-term memory at
+  `memory\\tom_runtime.sqlite`.
 
 ---
 
@@ -286,14 +413,14 @@ Recommended change block:
 
 This section is auto-maintained by the WhoAmI sync cron.
 
-- synced_at: 2026-02-18T16:16:02.934Z
+- synced_at: 2026-02-19T00:08:16.704Z
 - watched_files: 11
 - changed_files: 11
 
 ### Detected Runtime Wiring
 
 - startup_jobs: startCycleJob(), startGitHubSyncJob(), startWhoiamSyncJob(), startHttpApi()
-- api_endpoints: /health, /stats, /query, /ingest, /cycle
+- api_endpoints: /health, /stats, /lineage/latest, /lineage/runs, /query, /generate, /ingest, /cycle
 
 ### Changed Files Since Last Sync
 
@@ -311,16 +438,16 @@ This section is auto-maintained by the WhoAmI sync cron.
 
 ### Watched File Hashes
 
-- src/index.ts: 1e757afe4c0c3243fc09a469ae8f6cd7732a7643351986f04b5b2ad46100c2d9
-- src/core/config.ts: 6f62e0d0cf5b223d180ffcbec24ca37528dfb1b3b05f502499075e8aca086355
-- src/core/brain.ts: a1bdd3253f64af428b1cacbfd1af532d08fe246845fa03a577cfb9c9ceb11708
-- src/integrations/knowledgeLoader.ts: 192c01278fb6039acb56b5c5c69b132afe913a63f5811a70a25879d08a840fe4
-- src/integrations/vectorStore.ts: 9b8938e16b91f69f9199489b922e94c52acd81f7edd49983983c02415cfaebd2
-- src/api/httpServer.ts: 1fbe63a77f36a8c55599afc6d4275054c9afe5a743daa5f50bb27e1ad602bdb6
-- src/jobs/cycleJob.ts: cb3e6715d979c86856bd15f0918457a1a5df0f65b4fe548d7d8eb40ff420d664
-- src/jobs/githubSyncJob.ts: 1baf6b07df26a7e4c6e11f466cfd3b871ede198d17652dd40aa6b73834680762
-- src/integrations/githubReportSync.ts: 9ee906ffd1e4c20fbf7b42e845be8230bcb07ec5c1f2344aa5117b9e7d7b24c4
-- package.json: 19f60287f3109f2a29436d8f9caccbbfe265a98633068191aed5a8c5cf9cb2d7
-- README.md: 4db0701197c7465b934128c429618e27f9457900d1ca72f519d86e7577fee3f9
+- src/index.ts: 5a3348551d2bfe7bc04046d94d0fd09112c23b543b32f893fca000948aaf0aaa
+- src/core/config.ts: 399bf5b498c1c0cd412ed73d0d5780e0c8f8311ef2fb5cf70b653c0347136258
+- src/core/brain.ts: 02273bff291b36ee707fdd6f610c10c5045c8052269343b0167ca14a0e1b3bc8
+- src/integrations/knowledgeLoader.ts: 8776f197ac4eef53c08c6e308545fc887d15ec0503d4f1b43f517f2452bf45a3
+- src/integrations/vectorStore.ts: f00b9175bec887bc7981923534fc2c6e02984c50994c615718de5c6f5e73cf4b
+- src/api/httpServer.ts: aaac6e8d900a5d606dbb64061ac9d70321dd0e534f17c8bde79eeef4d6b5420f
+- src/jobs/cycleJob.ts: 0f387a4ac41aa8c841f5c51753dded7734a59dd2eda161fa13fd0027f544da73
+- src/jobs/githubSyncJob.ts: da021b9721076d8b6db01b053805817d168faeec79a82f8e766dcdf034a42aed
+- src/integrations/githubReportSync.ts: 49384c8df49781f378f0f88c0f5d22576bf6a4b98f81ce69b1222de24619d2ad
+- package.json: e9fe548bf143ce8eb74205ed6801f91eda8ec33e38ef899c28216a430aa721f4
+- README.md: f86f77fc412c73d9ef3f4eec78ee8cbd01f984eb1e9cde6ae546a682f5c53522
 
 <!-- WHOIAM_AUTO_SYNC:END -->
