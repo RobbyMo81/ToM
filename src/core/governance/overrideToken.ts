@@ -88,7 +88,7 @@ export const OVERRIDE_TOKEN_SCHEMA = z.object({
 export type OverrideToken = z.infer<typeof OVERRIDE_TOKEN_SCHEMA>;
 
 export type VerifyOverrideTokenResult =
-  | { ok: true; token: OverrideToken; canonicalSigningPayload: string }
+  | { ok: true; token: OverrideToken; canonicalSigningPayload: string; nonce: string; tokenHash: string }
   | { ok: false; reason: string };
 
 function toSigningView(token: OverrideToken): unknown {
@@ -126,6 +126,7 @@ export function verifyOverrideToken(
     resolveKey: (keyId: string) => Buffer | undefined;
     clockSkewSec?: number;
     enforceTokenHash?: boolean;
+    isRevoked?: (overrideId: string) => boolean;
   }
 ): VerifyOverrideTokenResult {
   const parsed = OVERRIDE_TOKEN_SCHEMA.safeParse(input);
@@ -134,6 +135,11 @@ export function verifyOverrideToken(
   }
 
   const token = parsed.data;
+
+  if (options.isRevoked && options.isRevoked(token.override_id)) {
+    return { ok: false, reason: "Override token has been revoked" };
+  }
+
   const now = Date.now();
   const skewMs = (options.clockSkewSec ?? 30) * 1000;
 
@@ -176,5 +182,11 @@ export function verifyOverrideToken(
     return { ok: false, reason: "Signature mismatch" };
   }
 
-  return { ok: true, token, canonicalSigningPayload };
+  return {
+    ok: true,
+    token,
+    canonicalSigningPayload,
+    nonce: token.integrity.nonce,
+    tokenHash: token.integrity.token_hash,
+  };
 }

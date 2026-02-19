@@ -243,6 +243,7 @@ export function decideCycleProposalPolicy(
     hitlOverrideToken?: HitlOverrideToken;
     overrideValidationErrors?: string[];
     nowIso?: string;
+    onAcceptOverride?: (token: HitlOverrideToken) => { ok: true } | { ok: false; reason: string };
   }
 ): OxidePolicyDecision {
   const nowIso = options?.nowIso ?? new Date().toISOString();
@@ -256,6 +257,7 @@ export function decideCycleProposalPolicy(
       token: options?.hitlOverrideToken,
       tokenValidation: overrideValidation,
       nowIso,
+      onAcceptOverride: options?.onAcceptOverride,
     });
 
     return {
@@ -273,6 +275,7 @@ export function decideCycleProposalPolicy(
       token: options?.hitlOverrideToken,
       tokenValidation: overrideValidation,
       nowIso,
+      onAcceptOverride: options?.onAcceptOverride,
     });
 
     if (autonomyGate.autonomyGranted) {
@@ -366,6 +369,7 @@ export function evaluateAutonomyGate(
     token?: HitlOverrideToken;
     tokenValidation?: HitlOverrideValidationResult;
     nowIso?: string;
+    onAcceptOverride?: (token: HitlOverrideToken) => { ok: true } | { ok: false; reason: string };
   }
 ): AutonomyGateDecision {
   if (finalGate === "GO") {
@@ -381,6 +385,18 @@ export function evaluateAutonomyGate(
 
   const validation = options?.tokenValidation ?? validateHitlOverrideToken(options?.token, options?.nowIso ?? new Date().toISOString());
   if (validation.valid && options?.token) {
+    const acceptance = options.onAcceptOverride ? options.onAcceptOverride(options.token) : { ok: true as const };
+    if (!acceptance.ok) {
+      return {
+        finalGate,
+        state: "SUPERVISED_NO_GO",
+        autonomyGranted: false,
+        reason: `NO-GO override rejected during acceptance checks (${acceptance.reason}).`,
+        overrideActive: false,
+        overrideId: null,
+      };
+    }
+
     return {
       finalGate,
       state: "OVERRIDE_AUTONOMY",

@@ -20,6 +20,9 @@ import {
   validateCycleProposalPayload,
 } from "./oxideGovernance";
 import { verifyOverrideToken } from "./governance/overrideToken";
+import { OverrideReplayLedger } from "./governance/overrideReplayLedger";
+import { OverrideRevocationStore } from "./governance/overrideRevocation";
+import { requirePrivilege } from "./governance/privilegedGate";
 import {
   createIdentityBinder,
   IdentityBindingUnavailableError,
@@ -97,6 +100,8 @@ export class ToMBrain {
     const cycleIdentityMetadata = this.toIdentityMetadata(cycleIdentity);
     const runtimeStore = new RuntimeMemoryStore(this.config.runtimeDbPath);
     runtimeStore.bootstrap();
+    const replayLedger = new OverrideReplayLedger();
+    const revocationStore = new OverrideRevocationStore();
 
     const triggerSource = options?.triggerSource ?? "manual";
     const initiatedBy = options?.initiatedBy ?? "tom";
@@ -228,6 +233,7 @@ export class ToMBrain {
             return this.config.overrideAuth.hmacKey;
           },
           enforceTokenHash: true,
+          isRevoked: (overrideId) => revocationStore.isRevoked(overrideId),
         });
 
         if (verification.ok) {
@@ -250,9 +256,53 @@ export class ToMBrain {
       const policyDecision = decideCycleProposalPolicy(proposalPayload, proposalValidation, {
         hitlOverrideToken: verifiedOverrideToken,
         overrideValidationErrors,
+        onAcceptOverride: (token) => {
+          if (revocationStore.isRevoked(token.override_id)) {
+            return {
+              ok: false,
+              reason: "override_revoked",
+            };
+          }
+
+          if (replayLedger.hasSeen(token.override_id, token.integrity.nonce)) {
+            return {
+              ok: false,
+              reason: "replay_detected",
+            };
+          }
+
+          replayLedger.markSeen(token.override_id, token.integrity.nonce, token.integrity.token_hash, new Date().toISOString());
+
+          return {
+            ok: true,
+          };
+        },
       });
 
+      const requireCyclePrivilege = (action: string, affectedPaths: string[]): void => {
+        requirePrivilege({
+          action,
+          affectedPaths,
+          finalGateStatus: policyDecision.autonomyGate.finalGate,
+          workspaceRoot: process.cwd(),
+          workflowRunId,
+          runtimeStore,
+          overrideToken: verifiedOverrideToken,
+          resolveKey: (keyId) => {
+            if (this.config.overrideAuth.keyId !== keyId) {
+              return undefined;
+            }
+            return this.config.overrideAuth.hmacKey;
+          },
+          isRevoked: (overrideId) => revocationStore.isRevoked(overrideId),
+        });
+      };
+
       this.assertRoleStage("oxide", "propose");
+
+      if (policyDecision.decision === "validated") {
+        requireCyclePrivilege("policy.create_proposal", ["memory/"]);
+      }
 
       const proposalId = runtimeStore.createSkillToLogicProposal({
         skillId: cycleSkillId,
@@ -305,6 +355,10 @@ export class ToMBrain {
           validationId,
         },
         async () => {
+          if (proposalValidated) {
+            requireCyclePrivilege("policy.approve_proposal", ["memory/"]);
+          }
+
           return runtimeStore.recordApproval({
             proposalId,
             approver: "oxide-governance",
@@ -326,6 +380,10 @@ export class ToMBrain {
           approvalId,
         },
         async () => {
+          if (proposalValidated) {
+            requireCyclePrivilege("policy.record_deploy_outcome", ["memory/"]);
+          }
+
           const deploymentStatus = proposalValidated ? "succeeded" : "failed";
           const id = runtimeStore.recordDeployOutcome({
             proposalId,

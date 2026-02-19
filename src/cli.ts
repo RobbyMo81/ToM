@@ -5,6 +5,15 @@ import { syncGitHubReport } from "./integrations/githubReportSync";
 import { syncWhoiamDocument } from "./integrations/whoiamSync";
 import { RuntimeMemoryStore } from "./integrations/runtimeMemoryStore";
 import { readFile } from "node:fs/promises";
+import { OverrideRevocationStore } from "./core/governance/overrideRevocation";
+
+function parseOption(args: string[], name: string): string | undefined {
+  const optionIndex = args.findIndex((value) => value === name);
+  if (optionIndex < 0) {
+    return undefined;
+  }
+  return args[optionIndex + 1];
+}
 
 async function loadOverrideTokenFromArgs(args: string[]): Promise<unknown | undefined> {
   const tokenIndex = args.findIndex((value) => value === "--override-token");
@@ -168,6 +177,21 @@ async function run(): Promise<void> {
       return;
     }
 
+    if (command === "revoke") {
+      const overrideId = parseOption(rest, "--override");
+      if (!overrideId || overrideId.trim().length === 0) {
+        throw new Error("Missing --override value. Example: npm run revoke -- --override <override_id> [--by <actor>] [--reason <text>]");
+      }
+
+      const revokedBy = parseOption(rest, "--by") ?? "cli-operator";
+      const reason = parseOption(rest, "--reason") ?? "Operator initiated revocation";
+
+      const revocationStore = new OverrideRevocationStore();
+      const record = revocationStore.revoke(overrideId.trim(), revokedBy.trim(), reason.trim());
+      logger.info("Override revoked", record);
+      return;
+    }
+
     if (command === "github-sync") {
       const syncReport = await syncGitHubReport(config);
       logger.info("GitHub sync report", syncReport);
@@ -190,6 +214,7 @@ async function run(): Promise<void> {
     console.log('  npm run query -- "<question>"');
     console.log('  npm run generate -- "<question>"');
     console.log("  npm run cycle [-- --override-token <path-to-json>]");
+    console.log("  npm run revoke -- --override <override_id> [--by <actor>] [--reason <text>]");
     console.log("  npm run github:sync");
     console.log("  npm run whoiam:sync");
   } finally {

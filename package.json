@@ -27,6 +27,7 @@
     "query": "tsx src/cli.ts query \"What did I learn about SSH hardening?\"",
     "generate": "tsx src/cli.ts generate \"Summarize what I learned about SSH hardening.\"",
     "cycle": "tsx src/cli.ts cycle",
+    "revoke": "tsx src/cli.ts revoke",
     "github:sync": "tsx src/cli.ts github-sync",
     "whoiam:sync": "tsx src/cli.ts whoiam-sync",
     "asbuilt:ingest": "tsx src/scripts/asBuiltCli.ts ingest",
