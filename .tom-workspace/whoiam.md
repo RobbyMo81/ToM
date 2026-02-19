@@ -66,9 +66,19 @@ flowchart TD
       B2 --> OXIDE_Instance["O.X.I.D.E (Bound to Helper Role)"]
    end
 
+  subgraph OxideEngine ["O.X.I.D.E Rust Executor (External Subsystem)"]
+    OE1[oxide CLI / JSON-RPC]
+    OE2[Refactor / Upgrade Engine]
+    OE3[CI Validation + Evidence]
+    OE4[Patch + PR Artifacts]
+    OE5[Monitor + Rollback Hooks]
+    OE1 --> OE2 --> OE3 --> OE4 --> OE5
+  end
+
    subgraph Core ["Logic Engine (ToMBrain)"]
       ToM_Instance --> F[runCycle]
       OXIDE_Instance --> F
+    F --> OE1
       F --> G[Ollama Health]
       F --> H[ingestKnowledge]
    end
@@ -82,8 +92,28 @@ flowchart TD
    style Binding fill:#fff3e0,stroke:#ff9800,stroke-width:2px
    style ToM_Instance fill:#4A90E2,stroke:#fff,color:#fff
    style OXIDE_Instance fill:#50E3C2,stroke:#333
+  style OxideEngine fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
    style Workspace fill:#fff9c4,stroke:#fbc02d
 ```
+
+### 2.X O.X.I.D.E Two-Layer Implementation Model (Role + Executor)
+
+O.X.I.D.E is implemented as two coupled layers:
+
+1. O.X.I.D.E Instance (Bound LLM Role)
+  - Role-bound reasoning persona operating inside ToM via Identity Binding.
+  - Produces scoped proposals, plans, and technical reasoning.
+  - Cannot directly modify code or promote deployments.
+2. `oxide` Rust Executor (Deterministic Engine)
+  - External Rust subsystem invoked by ToM (CLI/RPC).
+  - Performs deterministic refactors/upgrades, CI validation, and evidence
+    capture.
+  - Operates under governance policy, approval checks, and scoped autonomy
+    token rules.
+
+Rule: O.X.I.D.E Instance proposes; `oxide` executes. All code/config changes
+must be produced via the Rust executor pathway and promoted only through
+governed CI/CD.
 
 ### 2.1 Identity Bind Implementation Pattern
 
@@ -116,8 +146,9 @@ must follow this pattern:
     before every LLM call.
   - Role-separated runtime enforcement that guarantees ToM executive vs
     O.X.I.D.E subsystem boundaries at execution time.
-  - Dedicated O.X.I.D.E localized Rust brain subsystem described in planning
-    docs.
+  - Dedicated O.X.I.D.E Rust executor subsystem (`oxide`) invoked by ToM for
+    deterministic refactors, CI validation, and evidence capture (may include
+    localized Ollama-backed bounded reasoning).
 
 ---
 
@@ -139,6 +170,14 @@ must follow this pattern:
 4. `src/integrations/chunker.ts` (chunking)
 5. `src/integrations/ollamaClient.ts` (embeddings)
 6. `src/integrations/vectorStore.ts` (persistence + retrieval)
+
+### ToM ↔ `oxide` Executor Interface (v1)
+
+- Transport: local process invocation + stdin/stdout JSON-RPC (preferred v1)
+- Executor entrypoint: `oxide` binary on PATH or configured path
+- Evidence output: `.tom-workspace/proposals/<proposal_id>/evidence/`
+- Hard requirement: `oxide validate` must PASS before PR merge or deploy
+  promotion is permitted
 
 ### GitHub Sync Path
 
@@ -321,6 +360,13 @@ sequenceDiagram
   documented in `automation/README.md` (traceability index).
 - `docs/reference/` is reserved for ToM and O.X.I.D.E-specific memory
   artifacts only.
+- Rust executor boundary: all code/config changes must be executed via `oxide`
+  and must produce CI evidence artifacts before promotion.
+- Autonomy gating: autonomous execution is prohibited while final gate is
+  NO-GO unless a formally recorded, valid, time-bounded, project-scoped HITL
+  override token exists.
+- Token storage: approvals, scoped autonomy tokens, and NO-GO override tokens
+  are stored in `.tom-workspace/**` and remain excluded from vector memory.
 - Any change to these boundaries must update:
   - `src/integrations/knowledgeLoader.ts`
   - `src/core/brain.ts` (purge behavior)
