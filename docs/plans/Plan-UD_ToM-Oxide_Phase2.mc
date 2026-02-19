@@ -630,7 +630,3 @@ Pick **one signature encoding** and enforce it:
 Right now `sig` is `string().min(1)`; tightening that avoids sloppy signatures.
 
 ---
-
-
-
-
