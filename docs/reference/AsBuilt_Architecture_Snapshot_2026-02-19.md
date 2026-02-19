@@ -4,8 +4,8 @@ Purpose: seed `memory/as-built.sqlite` with concise, searchable architecture sta
 
 ## Peer Review Progress
 
-- peer_review_completed: `22/22`
-- peer_review_pending: `0/22`
+- peer_review_completed: `22/24`
+- peer_review_pending: `2/24`
 - last_progress_update: `2026-02-19`
 
 ## Record 1
@@ -250,12 +250,35 @@ Purpose: seed `memory/as-built.sqlite` with concise, searchable architecture sta
 - technical_validation: compaction policy is documented in AGENTS/whoiam and mirrored in memory README for central discoverability.
 - peer_review_status: approved (second-builder verification complete 2026-02-19)
 
+## Record 23
+
+- component_name: Memory Directory Contract (`memory/README.md`)
+- last_updated_by: GitHub Copilot
+- version_impact: additive (explicit memory-role and operations contract captured)
+- current_state: memory docs define roles for `tom_brain.sqlite`, `tom_runtime.sqlite`, and `as-built.sqlite`, plus separation-of-concerns, compaction policy, architecture update standards, and pre-commit automation behavior.
+- rationale: preserve consistent operator behavior and prevent misuse of runtime/vector stores during investigation and maintenance.
+- component_relationships: governance/startup references in `.tom-workspace/AGENTS.md` and `.tom-workspace/whoiam.md`; as-built progress automation via `.husky/pre-commit` and `src/scripts/updateAsBuiltPeerReviewProgress.ts`.
+- technical_validation: memory README sections and automation note are present and aligned to as-built workflows.
+- peer_review_status: pending second-builder verification
+
+## Record 24
+
+- component_name: HITL Override Token Integrity (Phase 2)
+- last_updated_by: GitHub Copilot
+- version_impact: additive (signed override verification + env-keyed secret sourcing)
+- current_state: override tokens are validated with Zod schema, canonical JSON signing view, HMAC-SHA256 signature verification, and timing-safe compare; cycle policy consumes verification outcomes before allowing NO-GO override autonomy.
+- rationale: make break-glass override artifacts tamper-evident while keeping signing keys external to `.tom-workspace` artifacts.
+- component_relationships: env key config in `src/core/config.ts` and `.env.example`; verifier module in `src/core/governance/overrideToken.ts`; policy integration in `src/core/brain.ts` + `src/core/oxideGovernance.ts`; CLI token ingestion via `src/cli.ts`.
+- technical_validation: `npm run lint` and `npm run build` pass after dependency and runtime wiring updates.
+- peer_review_status: pending second-builder verification
+
 ## Linked Artifacts
 
 - `memory/README.md`
 - `src/integrations/knowledgeLoader.ts`
 - `src/integrations/vectorStore.ts`
 - `src/scripts/asBuiltCli.ts`
+- `src/core/governance/overrideToken.ts`
 - `docs/build/Build_Instance_OXIDE_Skill_to_Logic.md`
 - `docs/handoffs/CTO_Escalation_OXIDE_Remaining_Open_Tasks_2026-02-19.md`
 
@@ -287,3 +310,5 @@ Use this table to complete the required second-builder verification.
 | 20 | Claude Sonnet 4.6 | 2026-02-19 | `isAuthorized` parses `Authorization: Bearer`, returns `401` for missing/invalid token. Guard runs before all route handlers; OPTIONS pre-flight intentionally excluded. | approved |
 | 21 | Claude Sonnet 4.6 | 2026-02-19 | `CycleReport` in `types.ts` has all five listed metrics plus `startedAt`/`finishedAt`. `runCycle` records LearnedSkill, Proposal, ValidationResult, Approval, Deploy with identity metadata. | approved |
 | 22 | Claude Sonnet 4.6 | 2026-02-19 | `memory/README.md` documents 250,000-token compaction threshold and `tom_runtime.sqlite` as target. Policy references in `AGENTS.md` and `whoiam.md` confirmed. | approved |
+| 23 | pending | pending | pending |  |
+| 24 | pending | pending | pending |  |

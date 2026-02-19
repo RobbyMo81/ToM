@@ -4,6 +4,22 @@ import { getConfig } from "./core/config";
 import { syncGitHubReport } from "./integrations/githubReportSync";
 import { syncWhoiamDocument } from "./integrations/whoiamSync";
 import { RuntimeMemoryStore } from "./integrations/runtimeMemoryStore";
+import { readFile } from "node:fs/promises";
+
+async function loadOverrideTokenFromArgs(args: string[]): Promise<unknown | undefined> {
+  const tokenIndex = args.findIndex((value) => value === "--override-token");
+  if (tokenIndex < 0) {
+    return undefined;
+  }
+
+  const filePath = args[tokenIndex + 1];
+  if (!filePath) {
+    throw new Error("Missing value for --override-token. Example: npm run cycle -- --override-token .tom-workspace/authorizations/override/token.json");
+  }
+
+  const content = await readFile(filePath, "utf8");
+  return JSON.parse(content);
+}
 
 async function run(): Promise<void> {
   const [, , command, ...rest] = process.argv;
@@ -142,9 +158,11 @@ async function run(): Promise<void> {
     }
 
     if (command === "cycle") {
+      const hitlOverrideToken = await loadOverrideTokenFromArgs(rest);
       const report = await brain.runCycle({
         triggerSource: "manual",
         initiatedBy: "cli",
+        hitlOverrideToken,
       });
       logger.info("Cycle report", report);
       return;
@@ -171,7 +189,7 @@ async function run(): Promise<void> {
     console.log("  npm run ingest");
     console.log('  npm run query -- "<question>"');
     console.log('  npm run generate -- "<question>"');
-    console.log("  npm run cycle");
+    console.log("  npm run cycle [-- --override-token <path-to-json>]");
     console.log("  npm run github:sync");
     console.log("  npm run whoiam:sync");
   } finally {

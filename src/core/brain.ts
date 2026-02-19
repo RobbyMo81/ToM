@@ -19,6 +19,7 @@ import {
   OXIDE_WORKFLOW_STAGES,
   validateCycleProposalPayload,
 } from "./oxideGovernance";
+import { verifyOverrideToken } from "./governance/overrideToken";
 import {
   createIdentityBinder,
   IdentityBindingUnavailableError,
@@ -29,7 +30,7 @@ import {
 interface RunCycleOptions {
   triggerSource?: "cron" | "manual" | "api" | "agent";
   initiatedBy?: string;
-  hitlOverrideToken?: HitlOverrideToken;
+  hitlOverrideToken?: unknown;
 }
 
 export class ToMBrain {
@@ -214,8 +215,41 @@ export class ToMBrain {
 
       const proposalPayload = createCycleProposalPayload(workflowRunId, report, recommendedActions);
       const proposalValidation = validateCycleProposalPayload(proposalPayload);
+
+      let verifiedOverrideToken: HitlOverrideToken | undefined;
+      let overrideValidationErrors: string[] = [];
+
+      if (options?.hitlOverrideToken) {
+        const verification = verifyOverrideToken(options.hitlOverrideToken, {
+          resolveKey: (keyId) => {
+            if (this.config.overrideAuth.keyId !== keyId) {
+              return undefined;
+            }
+            return this.config.overrideAuth.hmacKey;
+          },
+          enforceTokenHash: true,
+        });
+
+        if (verification.ok) {
+          verifiedOverrideToken = verification.token;
+        } else {
+          overrideValidationErrors = [verification.reason];
+          runtimeStore.appendTaskEvent({
+            workflowRunId,
+            eventType: "policy",
+            eventLevel: "high",
+            message: "Override token verification failed; NO-GO autonomy remains blocked.",
+            payload: {
+              policyDecision: "override-rejected",
+              decisionRationale: verification.reason,
+            },
+          });
+        }
+      }
+
       const policyDecision = decideCycleProposalPolicy(proposalPayload, proposalValidation, {
-        hitlOverrideToken: options?.hitlOverrideToken,
+        hitlOverrideToken: verifiedOverrideToken,
+        overrideValidationErrors,
       });
 
       this.assertRoleStage("oxide", "propose");

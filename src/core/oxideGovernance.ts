@@ -1,4 +1,5 @@
 import { type CycleReport } from "./types";
+import { type OverrideToken } from "./governance/overrideToken";
 
 export type OxideRiskLevel = "low" | "medium" | "high" | "critical";
 export type OxideWorkflowStage = "discover" | "propose" | "validate" | "approve" | "promote";
@@ -103,16 +104,7 @@ export interface OxidePolicyDecision {
   };
 }
 
-export interface HitlOverrideToken extends Record<string, unknown> {
-  overrideId: string;
-  approver: string;
-  projectScope: string;
-  riskAcceptance: string;
-  issuedAt: string;
-  expiresAt: string;
-  linkedProposalRef: string;
-  authorizationLanguage: string;
-}
+export type HitlOverrideToken = OverrideToken;
 
 export interface HitlOverrideValidationResult {
   valid: boolean;
@@ -249,11 +241,15 @@ export function decideCycleProposalPolicy(
   validation: OxideValidationResult,
   options?: {
     hitlOverrideToken?: HitlOverrideToken;
+    overrideValidationErrors?: string[];
     nowIso?: string;
   }
 ): OxidePolicyDecision {
   const nowIso = options?.nowIso ?? new Date().toISOString();
-  const overrideValidation = validateHitlOverrideToken(options?.hitlOverrideToken, nowIso);
+  const overrideValidation =
+    options?.overrideValidationErrors && options.overrideValidationErrors.length > 0
+      ? { valid: false, errors: [...options.overrideValidationErrors] }
+      : validateHitlOverrideToken(options?.hitlOverrideToken, nowIso);
 
   if (!validation.valid) {
     const autonomyGate = evaluateAutonomyGate("NO-GO", {
@@ -326,46 +322,34 @@ export function validateHitlOverrideToken(token: HitlOverrideToken | undefined, 
 
   const errors: string[] = [];
 
-  if (typeof token.overrideId !== "string" || token.overrideId.trim().length === 0) {
-    errors.push("overrideId must be a non-empty string");
-  }
-  if (typeof token.approver !== "string" || token.approver.trim().length === 0) {
-    errors.push("approver must be a non-empty string");
-  }
-  if (typeof token.projectScope !== "string" || token.projectScope.trim().length === 0) {
-    errors.push("projectScope must be a non-empty string");
-  }
-  if (typeof token.riskAcceptance !== "string" || token.riskAcceptance.trim().length === 0) {
-    errors.push("riskAcceptance must be a non-empty string");
-  }
-  if (typeof token.linkedProposalRef !== "string" || token.linkedProposalRef.trim().length === 0) {
-    errors.push("linkedProposalRef must be a non-empty string");
+  if (!token.override_id || token.override_id.trim().length === 0) {
+    errors.push("override_id must be a non-empty string");
   }
 
-  const issuedAtDate = new Date(token.issuedAt);
-  const expiresAtDate = new Date(token.expiresAt);
+  const issuedAtDate = new Date(token.authorization.issued_at);
+  const expiresAtDate = new Date(token.authorization.expires_at);
   const nowDate = new Date(nowIso);
 
   if (Number.isNaN(issuedAtDate.getTime())) {
-    errors.push("issuedAt must be an ISO timestamp");
+    errors.push("authorization.issued_at must be an ISO timestamp");
   }
   if (Number.isNaN(expiresAtDate.getTime())) {
-    errors.push("expiresAt must be an ISO timestamp");
+    errors.push("authorization.expires_at must be an ISO timestamp");
   }
   if (!Number.isNaN(issuedAtDate.getTime()) && !Number.isNaN(expiresAtDate.getTime()) && expiresAtDate <= issuedAtDate) {
-    errors.push("expiresAt must be later than issuedAt");
+    errors.push("authorization.expires_at must be later than authorization.issued_at");
   }
   if (!Number.isNaN(expiresAtDate.getTime()) && !Number.isNaN(nowDate.getTime()) && expiresAtDate <= nowDate) {
     errors.push("override token is expired");
   }
 
-  if (typeof token.authorizationLanguage !== "string" || token.authorizationLanguage.trim().length === 0) {
-    errors.push("authorizationLanguage must be a non-empty string");
+  if (!token.authorization.statement || token.authorization.statement.trim().length === 0) {
+    errors.push("authorization.statement must be a non-empty string");
   } else {
-    const normalized = token.authorizationLanguage.trim().toLowerCase();
+    const normalized = token.authorization.statement.trim().toLowerCase();
     for (const phrase of REQUIRED_AUTHORIZATION_PHRASES) {
-      if (!normalized.includes(phrase)) {
-        errors.push(`authorizationLanguage missing required phrase: ${phrase}`);
+      if (!normalized.includes(phrase.toLowerCase())) {
+        errors.push(`authorization.statement missing required phrase: ${phrase}`);
       }
     }
   }
@@ -403,7 +387,7 @@ export function evaluateAutonomyGate(
       autonomyGranted: true,
       reason: "NO-GO overridden by valid HITL token; bounded temporary autonomy granted.",
       overrideActive: true,
-      overrideId: options.token.overrideId,
+      overrideId: options.token.override_id,
     };
   }
 

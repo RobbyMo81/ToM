@@ -71,6 +71,27 @@ export interface AppConfig {
     maxChars: number;
     overlapChars: number;
   };
+  overrideAuth: {
+    keyId: string;
+    hmacKey?: Buffer;
+  };
+}
+
+function decodeBase64Key(value: string | undefined): Buffer | undefined {
+  if (!value || value.trim().length === 0) {
+    return undefined;
+  }
+
+  try {
+    const normalized = value.trim();
+    const decoded = Buffer.from(normalized, "base64");
+    if (decoded.length === 0) {
+      return undefined;
+    }
+    return decoded;
+  } catch {
+    return undefined;
+  }
 }
 
 export function getConfig(): AppConfig {
@@ -164,6 +185,10 @@ export function getConfig(): AppConfig {
     chunking: {
       maxChars: readNumber(process.env.CHUNK_MAX_CHARS, 1200),
       overlapChars: readNumber(process.env.CHUNK_OVERLAP_CHARS, 200),
+    },
+    overrideAuth: {
+      keyId: process.env.TOM_OVERRIDE_HMAC_KEY_ID ?? "oxide-local-override-key",
+      hmacKey: decodeBase64Key(process.env.TOM_OVERRIDE_HMAC_KEY_B64),
     },
   };
 }
