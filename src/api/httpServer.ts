@@ -2,6 +2,7 @@ import { createServer, type IncomingMessage, type ServerResponse } from "node:ht
 import { getConfig } from "../core/config";
 import { logger } from "../core/logger";
 import { ToMBrain } from "../core/brain";
+import { type HitlOverrideToken } from "../core/oxideGovernance";
 import { RuntimeMemoryStore } from "../integrations/runtimeMemoryStore";
 
 interface QueryBody {
@@ -12,6 +13,10 @@ interface QueryBody {
 interface GenerateBody {
   question?: string;
   topK?: number;
+}
+
+interface CycleBody {
+  hitlOverrideToken?: HitlOverrideToken;
 }
 
 function setJsonHeaders(response: ServerResponse): void {
@@ -311,11 +316,13 @@ export function startHttpApi(): void {
       }
 
       if (method === "POST" && requestUrl.pathname === "/cycle") {
+        const body = await parseJsonBody<CycleBody>(request);
         const brain = new ToMBrain();
         try {
           const report = await brain.runCycle({
             triggerSource: "api",
             initiatedBy: "api",
+            hitlOverrideToken: body.hitlOverrideToken,
           });
           sendJson(response, 200, {
             action: "cycle",

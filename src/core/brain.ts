@@ -13,6 +13,7 @@ import {
   assertRoleCanExecuteStage,
   createCycleProposalPayload,
   decideCycleProposalPolicy,
+  type HitlOverrideToken,
   OxideRolePolicyError,
   OXIDE_ROLE_CONTRACTS,
   OXIDE_WORKFLOW_STAGES,
@@ -28,6 +29,7 @@ import {
 interface RunCycleOptions {
   triggerSource?: "cron" | "manual" | "api" | "agent";
   initiatedBy?: string;
+  hitlOverrideToken?: HitlOverrideToken;
 }
 
 export class ToMBrain {
@@ -212,7 +214,9 @@ export class ToMBrain {
 
       const proposalPayload = createCycleProposalPayload(workflowRunId, report, recommendedActions);
       const proposalValidation = validateCycleProposalPayload(proposalPayload);
-      const policyDecision = decideCycleProposalPolicy(proposalPayload, proposalValidation);
+      const policyDecision = decideCycleProposalPolicy(proposalPayload, proposalValidation, {
+        hitlOverrideToken: options?.hitlOverrideToken,
+      });
 
       this.assertRoleStage("oxide", "propose");
 
@@ -346,8 +350,28 @@ export class ToMBrain {
           approvalId,
           deployOutcomeId,
           proposalStatus: proposalValidated ? "promoted" : "rejected",
+          autonomyGate: policyDecision.autonomyGate,
         },
       });
+
+      if (policyDecision.autonomyGate.overrideActive) {
+        runtimeStore.appendTaskEvent({
+          workflowRunId,
+          eventType: "approval",
+          eventLevel: "high",
+          message: "HITL override activated under NO-GO gate with bounded autonomy.",
+          payload: {
+            role: "human",
+            stage: "approve",
+            authority: "oxide-governance",
+            policyDecision: "override-autonomy",
+            decisionRationale: policyDecision.reason,
+            overrideId: policyDecision.autonomyGate.overrideId,
+            overrideState: policyDecision.autonomyGate.state,
+            finalGate: policyDecision.autonomyGate.finalGate,
+          },
+        });
+      }
 
       runtimeStore.endWorkflowRun(workflowRunId, "succeeded", {
         identity: cycleIdentityMetadata,

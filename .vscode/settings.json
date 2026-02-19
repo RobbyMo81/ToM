@@ -1,0 +1,7 @@
+{
+  "rust-analyzer.checkOnSave": false,
+  "rust-analyzer.check.extraArgs": [
+    "--target-dir",
+    "target/analyzer"
+  ]
+}

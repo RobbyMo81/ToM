@@ -1,0 +1,14 @@
+[
+  {
+    "key": "ctrl+alt+r",
+    "command": "settings.cycle",
+    "args": {
+      "setting": "rust-analyzer.checkOnSave",
+      "values": [
+        true,
+        false
+      ]
+    },
+    "when": "editorLangId == rust"
+  }
+]

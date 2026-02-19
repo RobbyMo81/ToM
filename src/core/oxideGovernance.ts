@@ -94,7 +94,45 @@ export interface OxidePolicyDecision {
   determinismScore: number;
   decision: "validated" | "rejected";
   reason: string;
+  autonomyGate: {
+    finalGate: "GO" | "NO-GO";
+    state: "SUPERVISED_NO_GO" | "OVERRIDE_AUTONOMY" | "NORMAL_GO";
+    autonomyGranted: boolean;
+    overrideActive: boolean;
+    overrideId: string | null;
+  };
 }
+
+export interface HitlOverrideToken extends Record<string, unknown> {
+  overrideId: string;
+  approver: string;
+  projectScope: string;
+  riskAcceptance: string;
+  issuedAt: string;
+  expiresAt: string;
+  linkedProposalRef: string;
+  authorizationLanguage: string;
+}
+
+export interface HitlOverrideValidationResult {
+  valid: boolean;
+  errors: string[];
+}
+
+export interface AutonomyGateDecision {
+  finalGate: "GO" | "NO-GO";
+  state: "SUPERVISED_NO_GO" | "OVERRIDE_AUTONOMY" | "NORMAL_GO";
+  autonomyGranted: boolean;
+  reason: string;
+  overrideActive: boolean;
+  overrideId: string | null;
+}
+
+const REQUIRED_AUTHORIZATION_PHRASES = [
+  "i acknowledge the system is in no-go",
+  "i accept the associated risks",
+  "you are granted full control within the approved project scope until completion or expiration",
+] as const;
 
 export function createCycleProposalPayload(
   workflowRunId: string,
@@ -208,27 +246,65 @@ export function validateCycleProposalPayload(payload: unknown): OxideValidationR
 
 export function decideCycleProposalPolicy(
   payload: OxideCycleProposalPayload,
-  validation: OxideValidationResult
+  validation: OxideValidationResult,
+  options?: {
+    hitlOverrideToken?: HitlOverrideToken;
+    nowIso?: string;
+  }
 ): OxidePolicyDecision {
+  const nowIso = options?.nowIso ?? new Date().toISOString();
+  const overrideValidation = validateHitlOverrideToken(options?.hitlOverrideToken, nowIso);
+
   if (!validation.valid) {
+    const autonomyGate = evaluateAutonomyGate("NO-GO", {
+      token: options?.hitlOverrideToken,
+      tokenValidation: overrideValidation,
+      nowIso,
+    });
+
     return {
       policyPass: false,
       riskLevel: "critical",
       determinismScore: 0,
       decision: "rejected",
       reason: `Proposal payload schema validation failed: ${validation.errors.join("; ")}`,
+      autonomyGate,
     };
   }
 
   if (payload.report.documentsIndexed <= 0) {
+    const autonomyGate = evaluateAutonomyGate("NO-GO", {
+      token: options?.hitlOverrideToken,
+      tokenValidation: overrideValidation,
+      nowIso,
+    });
+
+    if (autonomyGate.autonomyGranted) {
+      return {
+        policyPass: true,
+        riskLevel: "high",
+        determinismScore: 0.65,
+        decision: "validated",
+        reason: `NO-GO overridden by valid HITL authorization (${autonomyGate.overrideId}); bounded autonomy granted.`,
+        autonomyGate,
+      };
+    }
+
     return {
       policyPass: false,
       riskLevel: "medium",
       determinismScore: 0.8,
       decision: "rejected",
       reason: "Cycle indexed zero documents; proposal blocked by deterministic policy gate.",
+      autonomyGate,
     };
   }
+
+  const autonomyGate = evaluateAutonomyGate("GO", {
+    token: options?.hitlOverrideToken,
+    tokenValidation: overrideValidation,
+    nowIso,
+  });
 
   return {
     policyPass: true,
@@ -236,5 +312,107 @@ export function decideCycleProposalPolicy(
     determinismScore: 1,
     decision: "validated",
     reason: "Cycle payload passed schema and deterministic policy gates.",
+    autonomyGate,
+  };
+}
+
+export function validateHitlOverrideToken(token: HitlOverrideToken | undefined, nowIso: string): HitlOverrideValidationResult {
+  if (!token) {
+    return {
+      valid: false,
+      errors: ["override token missing"],
+    };
+  }
+
+  const errors: string[] = [];
+
+  if (typeof token.overrideId !== "string" || token.overrideId.trim().length === 0) {
+    errors.push("overrideId must be a non-empty string");
+  }
+  if (typeof token.approver !== "string" || token.approver.trim().length === 0) {
+    errors.push("approver must be a non-empty string");
+  }
+  if (typeof token.projectScope !== "string" || token.projectScope.trim().length === 0) {
+    errors.push("projectScope must be a non-empty string");
+  }
+  if (typeof token.riskAcceptance !== "string" || token.riskAcceptance.trim().length === 0) {
+    errors.push("riskAcceptance must be a non-empty string");
+  }
+  if (typeof token.linkedProposalRef !== "string" || token.linkedProposalRef.trim().length === 0) {
+    errors.push("linkedProposalRef must be a non-empty string");
+  }
+
+  const issuedAtDate = new Date(token.issuedAt);
+  const expiresAtDate = new Date(token.expiresAt);
+  const nowDate = new Date(nowIso);
+
+  if (Number.isNaN(issuedAtDate.getTime())) {
+    errors.push("issuedAt must be an ISO timestamp");
+  }
+  if (Number.isNaN(expiresAtDate.getTime())) {
+    errors.push("expiresAt must be an ISO timestamp");
+  }
+  if (!Number.isNaN(issuedAtDate.getTime()) && !Number.isNaN(expiresAtDate.getTime()) && expiresAtDate <= issuedAtDate) {
+    errors.push("expiresAt must be later than issuedAt");
+  }
+  if (!Number.isNaN(expiresAtDate.getTime()) && !Number.isNaN(nowDate.getTime()) && expiresAtDate <= nowDate) {
+    errors.push("override token is expired");
+  }
+
+  if (typeof token.authorizationLanguage !== "string" || token.authorizationLanguage.trim().length === 0) {
+    errors.push("authorizationLanguage must be a non-empty string");
+  } else {
+    const normalized = token.authorizationLanguage.trim().toLowerCase();
+    for (const phrase of REQUIRED_AUTHORIZATION_PHRASES) {
+      if (!normalized.includes(phrase)) {
+        errors.push(`authorizationLanguage missing required phrase: ${phrase}`);
+      }
+    }
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors,
+  };
+}
+
+export function evaluateAutonomyGate(
+  finalGate: "GO" | "NO-GO",
+  options?: {
+    token?: HitlOverrideToken;
+    tokenValidation?: HitlOverrideValidationResult;
+    nowIso?: string;
+  }
+): AutonomyGateDecision {
+  if (finalGate === "GO") {
+    return {
+      finalGate,
+      state: "NORMAL_GO",
+      autonomyGranted: true,
+      reason: "Final gate is GO; normal autonomy policy applies.",
+      overrideActive: false,
+      overrideId: null,
+    };
+  }
+
+  const validation = options?.tokenValidation ?? validateHitlOverrideToken(options?.token, options?.nowIso ?? new Date().toISOString());
+  if (validation.valid && options?.token) {
+    return {
+      finalGate,
+      state: "OVERRIDE_AUTONOMY",
+      autonomyGranted: true,
+      reason: "NO-GO overridden by valid HITL token; bounded temporary autonomy granted.",
+      overrideActive: true,
+      overrideId: options.token.overrideId,
+    };
+  }
+
+  return {
+    finalGate,
+    state: "SUPERVISED_NO_GO",
+    autonomyGranted: false,
+    reason: `NO-GO blocks autonomy; no valid HITL override token (${validation.errors.join("; ")}).`,
+    overrideActive: false,
+    overrideId: null,
   };
 }
