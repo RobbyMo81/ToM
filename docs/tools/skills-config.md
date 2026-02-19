@@ -8,6 +8,8 @@ title: "Skills Config"
 
 # Skills Config
 
+> **ToM alignment note (2026-02-19):** This page was imported from OpenClaw docs. Paths like `~/.openclaw/...` are legacy examples; follow this repo's local skill layout and `.tom-workspace/AGENTS.md`.
+
 All skills-related configuration lives under `skills` in `~/.openclaw/openclaw.json`.
 
 ```json5

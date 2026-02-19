@@ -7,6 +7,8 @@ status: active
 
 # Multi-Agent Sandbox & Tools Configuration
 
+> **ToM alignment note (2026-02-19):** This page was imported from OpenClaw docs. Multi-agent gateway policy examples are legacy unless this project is running the same OpenClaw gateway architecture.
+
 ## Overview
 
 Each agent in a multi-agent setup can now have its own:

@@ -8,6 +8,8 @@ title: "LLM Task"
 
 # LLM Task
 
+> **ToM alignment note (2026-02-19):** This page was imported from OpenClaw docs. Plugin-specific `llm-task` setup is legacy unless your ToM environment explicitly includes that plugin runtime.
+
 `llm-task` is an **optional plugin tool** that runs a JSON-only LLM task and
 returns structured output (optionally validated against JSON Schema).
 

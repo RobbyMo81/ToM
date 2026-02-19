@@ -4,6 +4,8 @@ title: "Creating Skills"
 
 # Creating Custom Skills 🛠
 
+> **ToM alignment note (2026-02-19):** This page was imported from OpenClaw docs. Use this as a concept reference only, and follow this repo's actual skill locations/policies in `.tom-workspace/AGENTS.md` and local `skills/` conventions.
+
 OpenClaw is designed to be easily extensible. "Skills" are the primary way to add new capabilities to your assistant.
 
 ## What is a Skill?

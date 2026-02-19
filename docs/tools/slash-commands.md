@@ -8,6 +8,8 @@ title: "Slash Commands"
 
 # Slash commands
 
+> **ToM alignment note (2026-02-19):** This page was imported from OpenClaw docs. Slash-command behavior here is legacy unless your active deployment includes that OpenClaw gateway command parser.
+
 Commands are handled by the Gateway. Most commands must be sent as a **standalone** message that starts with `/`.
 The host-only bash chat command uses `! <cmd>` (with `/bash <cmd>` as an alias).
 

@@ -1,3 +1,5 @@
 npm run build
 npm run lint
+npm run asbuilt:progress
+git add docs/reference/AsBuilt_Architecture_Snapshot_2026-02-19.md
 npm run lint:md

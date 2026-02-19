@@ -1,12 +1,21 @@
 ---
-summary: "Agent tool surface for OpenClaw (browser, canvas, nodes, message, cron) replacing legacy `openclaw-*` skills"
+summary: "ToM tool-doc alignment index; imported OpenClaw pages are marked as legacy reference"
 read_when:
-  - Adding or modifying agent tools
-  - Retiring or changing `openclaw-*` skills
+  - Reviewing tool docs for ToM project relevance
+  - Distinguishing active ToM workflows from imported legacy OpenClaw guidance
 title: "Tools"
 ---
 
-# Tools (OpenClaw)
+# Tools (ToM-aligned index)
+
+> **ToM alignment note (2026-02-19):** Most pages in this directory were copied from an OpenClaw documentation set. Unless a page has been explicitly rewritten for ToM, treat `openclaw ...` commands and OpenClaw-specific config as legacy reference.
+
+## Active ToM source of truth
+
+- Operational commands: root `README.md` and `package.json` (`npm run ingest`, `query`, `generate`, `cycle`, `github:sync`, `whoiam:sync`, `lint:all`).
+- Agent behavior and startup requirements: `.tom-workspace/AGENTS.md` and `memory/SOP.md`.
+- Build governance and closeout evidence: `docs/build/`, `docs/plans/`, `docs/debriefs/`, and `docs/handoffs/`.
+- File-level alignment inventory: `docs/tools/STATUS.md`.
 
 OpenClaw exposes **first-class agent tools** for browser, canvas, nodes, and cron.
 These replace the old `openclaw-*` skills: the tools are typed, no shelling,

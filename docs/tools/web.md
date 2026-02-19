@@ -9,6 +9,8 @@ title: "Web Tools"
 
 # Web tools
 
+> **ToM alignment note (2026-02-19):** This page was imported from OpenClaw docs. `web_search/web_fetch` configuration keys here are legacy unless your ToM deployment includes that OpenClaw tool runtime.
+
 OpenClaw ships two lightweight web tools:
 
 - `web_search` — Search the web via Brave Search API (default) or Perplexity Sonar (direct or via OpenRouter).

@@ -9,6 +9,8 @@ read_when:
 
 # Tool-loop detection
 
+> **ToM alignment note (2026-02-19):** This page was imported from OpenClaw docs. Loop-detection config keys here apply to that runtime surface and are legacy unless adopted directly into this project.
+
 OpenClaw can keep agents from getting stuck in repeated tool-call patterns.
 The guard is **disabled by default**.
 

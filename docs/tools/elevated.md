@@ -7,6 +7,8 @@ title: "Elevated Mode"
 
 # Elevated Mode (/elevated directives)
 
+> **ToM alignment note (2026-02-19):** This page was imported from OpenClaw docs. `/elevated` directive behavior is legacy unless an OpenClaw gateway runtime is active for this project.
+
 ## What it does
 
 - `/elevated on` runs on the gateway host and keeps exec approvals (same as `/elevated ask`).

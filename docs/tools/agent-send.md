@@ -7,6 +7,8 @@ title: "Agent Send"
 
 # `openclaw agent` (direct agent runs)
 
+> **ToM alignment note (2026-02-19):** This page was imported from an OpenClaw documentation set. Any `openclaw ...` command shown here is legacy reference and not authoritative for this repository. Use `README.md`, `.tom-workspace/AGENTS.md`, and `package.json` scripts for active ToM workflows.
+
 `openclaw agent` runs a single agent turn without needing an inbound chat message.
 By default it goes **through the Gateway**; add `--local` to force the embedded
 runtime on the current machine.

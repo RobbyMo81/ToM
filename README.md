@@ -100,9 +100,17 @@ When watched files change, ToM updates an auto-generated snapshot section in `wh
   ```bash
   npm run query -- "What lessons did I record about SSH hardening?"
   ```
+- Semantic query against the as-built architecture DB:
+  ```bash
+  npm run asbuilt:query -- "Summarize the current architecture and governance state"
+  ```
 - Retrieval-grounded generation:
   ```bash
   npm run generate -- "Summarize what I learned about SSH hardening"
+  ```
+- Ingest current docs into the as-built architecture DB:
+  ```bash
+  npm run asbuilt:ingest
   ```
 - Run one full cycle:
   ```bash

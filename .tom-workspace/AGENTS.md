@@ -13,10 +13,18 @@ Before doing anything else:
 1. Read `SOUL.md` — this is who you are
 2. Read `USER.md` — this is who you're helping
 3. Read `whoiam.md` — technical build identity, architecture, and logic paths
-4. Read `memory/YYYY-MM-DD.md` (today + yesterday) for recent context
-5. **If in MAIN SESSION** (direct chat with your human): Also read `MEMORY.md`
+4. Read `memory/SOP.md` — this is the living SOP you must understand and maintain
+5. Read `memory/YYYY-MM-DD.md` (today + yesterday) for recent context
+6. **If in MAIN SESSION** (direct chat with your human): Also read `MEMORY.md`
 
 For this startup checklist, don't ask permission. Just do it.
+
+### Living SOP Requirement
+
+- Treat `memory/SOP.md` as a required living document.
+- Every LLM agent must read and understand it before execution.
+- When procedures, safeguards, or recurring workflows change, update `memory/SOP.md` in the same work session.
+- Keep SOP updates precise, auditable, and aligned with current operating behavior.
 
 ## Agent Base Languages
 

@@ -6,3 +6,4 @@ memory/*.sqlite
 memory/web/
 *.log
 oxide-brain/target/
+.claude/settings.local.json

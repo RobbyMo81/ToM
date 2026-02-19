@@ -8,6 +8,8 @@ title: "Browser Login"
 
 # Browser login + X/Twitter posting
 
+> **ToM alignment note (2026-02-19):** This page was imported from OpenClaw docs. Login/browser relay steps are legacy reference unless that external browser stack is intentionally enabled for this project.
+
 ## Manual login (recommended)
 
 When a site requires login, **sign in manually** in the **host** browser profile (the openclaw browser).

@@ -8,6 +8,8 @@ title: "Skills"
 
 # Skills (OpenClaw)
 
+> **ToM alignment note (2026-02-19):** This page was imported from OpenClaw docs. Use it as reference only; prioritize ToM-specific skill behavior and shared `skills/` + `tools/` guidance defined in `.tom-workspace/AGENTS.md`.
+
 OpenClaw uses **[AgentSkills](https://agentskills.io)-compatible** skill folders to teach the agent how to use tools. Each skill is a directory containing a `SKILL.md` with YAML frontmatter and instructions. OpenClaw loads **bundled skills** plus optional local overrides, and filters them at load time based on environment, config, and binary presence.
 
 ## Locations and precedence

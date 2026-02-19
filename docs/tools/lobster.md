@@ -9,6 +9,8 @@ read_when:
 
 # Lobster
 
+> **ToM alignment note (2026-02-19):** This page was imported from OpenClaw docs. Lobster/OpenClaw tool calls are legacy reference unless the Lobster plugin and OpenClaw gateway are intentionally enabled in your current ToM deployment.
+
 Lobster is a workflow shell that lets OpenClaw run multi-step tool sequences as a single, deterministic operation with explicit approval checkpoints.
 
 ## Hook

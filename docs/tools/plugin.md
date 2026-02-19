@@ -8,6 +8,8 @@ title: "Plugins"
 
 # Plugins (Extensions)
 
+> **ToM alignment note (2026-02-19):** This page was imported from OpenClaw docs. Plugin lifecycle commands here are legacy unless your ToM runtime includes that OpenClaw plugin system.
+
 ## Quick start (new to plugins?)
 
 A plugin is just a **small code module** that extends OpenClaw with extra

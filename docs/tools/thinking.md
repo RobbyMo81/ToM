@@ -7,6 +7,8 @@ title: "Thinking Levels"
 
 # Thinking Levels (/think directives)
 
+> **ToM alignment note (2026-02-19):** This page was imported from OpenClaw docs. Directive syntax and model-mapping details here are legacy unless your active runtime exposes the same slash-directive interface.
+
 ## What it does
 
 - Inline directive in any inbound body: `/t <level>`, `/think:<level>`, or `/thinking <level>`.

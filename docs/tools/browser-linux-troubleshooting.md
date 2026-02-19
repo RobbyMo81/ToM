@@ -6,6 +6,8 @@ title: "Browser Troubleshooting"
 
 # Browser Troubleshooting (Linux)
 
+> **ToM alignment note (2026-02-19):** This page was imported from OpenClaw browser docs. Steps here are legacy unless your current stack explicitly includes that OpenClaw browser gateway.
+
 ## Problem: "Failed to start Chrome CDP on port 18800"
 
 OpenClaw's browser control server fails to launch Chrome/Brave/Edge/Chromium with the error:

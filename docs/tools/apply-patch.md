@@ -8,6 +8,8 @@ title: "apply_patch Tool"
 
 # apply_patch tool
 
+> **ToM alignment note (2026-02-19):** This page is retained for generic patch-format guidance. Where examples reference external runtime conventions, prefer this repo's active process in `README.md` and `.tom-workspace/AGENTS.md`.
+
 Apply file changes using a structured patch format. This is ideal for multi-file
 or multi-hunk edits where a single `edit` call would be brittle.
 

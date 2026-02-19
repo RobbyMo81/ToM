@@ -8,6 +8,8 @@ title: "Sub-Agents"
 
 # Sub-agents
 
+> **ToM alignment note (2026-02-19):** This page was imported from OpenClaw docs. Sub-agent session/tool controls here are legacy unless your ToM environment runs that OpenClaw sub-agent runtime.
+
 Sub-agents are background agent runs spawned from an existing agent run. They run in their own session (`agent:<agentId>:subagent:<uuid>`) and, when finished, **announce** their result back to the requester chat channel.
 
 ## Slash command

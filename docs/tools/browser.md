@@ -9,6 +9,8 @@ title: "Browser (OpenClaw-managed)"
 
 # Browser (openclaw-managed)
 
+> **ToM alignment note (2026-02-19):** This page was imported from OpenClaw docs. Commands and config paths using `openclaw` are legacy unless an OpenClaw browser gateway is part of your active ToM deployment.
+
 OpenClaw can run a **dedicated Chrome/Brave/Edge/Chromium profile** that the agent controls.
 It is isolated from your personal browser and is managed through a small local
 control service inside the Gateway (loopback only).

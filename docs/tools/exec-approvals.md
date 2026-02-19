@@ -9,6 +9,8 @@ title: "Exec Approvals"
 
 # Exec approvals
 
+> **ToM alignment note (2026-02-19):** This page was imported from OpenClaw docs. Approval policy details here are legacy unless this repo is running that OpenClaw companion/node approval stack.
+
 Exec approvals are the **companion app / node host guardrail** for letting a sandboxed agent run
 commands on a real host (`gateway` or `node`). Think of it like a safety interlock:
 commands are allowed only when policy + allowlist + (optional) user approval all agree.

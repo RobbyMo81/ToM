@@ -9,6 +9,8 @@ title: "Chrome Extension"
 
 # Chrome extension (browser relay)
 
+> **ToM alignment note (2026-02-19):** This page was imported from OpenClaw docs. Treat extension relay setup as legacy reference unless the OpenClaw browser relay is intentionally in scope.
+
 The OpenClaw Chrome extension lets the agent control your **existing Chrome tabs** (your normal Chrome window) instead of launching a separate openclaw-managed Chrome profile.
 
 Attach/detach happens via a **single Chrome toolbar button**.

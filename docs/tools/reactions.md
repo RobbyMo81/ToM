@@ -7,6 +7,8 @@ title: "Reactions"
 
 # Reaction tooling
 
+> **ToM alignment note (2026-02-19):** This page was imported from OpenClaw docs. Channel reaction semantics are legacy guidance unless those messaging integrations are active in your current ToM deployment.
+
 Shared reaction semantics across channels:
 
 - `emoji` is required when adding a reaction.

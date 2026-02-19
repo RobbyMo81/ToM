@@ -8,6 +8,8 @@ title: "Exec Tool"
 
 # Exec tool
 
+> **ToM alignment note (2026-02-19):** This page was imported from OpenClaw docs. `exec/process` behavior described here is legacy reference unless that runtime tool surface is enabled in your environment.
+
 Run shell commands in the workspace. Supports foreground + background execution via `process`.
 If `process` is disallowed, `exec` runs synchronously and ignores `yieldMs`/`background`.
 Background sessions are scoped per agent; `process` only sees sessions from the same agent.

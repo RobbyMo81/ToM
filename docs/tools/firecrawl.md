@@ -9,6 +9,8 @@ title: "Firecrawl"
 
 # Firecrawl
 
+> **ToM alignment note (2026-02-19):** This page was imported from OpenClaw docs. Firecrawl integration steps are optional and only relevant if your active ToM deployment uses that web-fetch extension path.
+
 OpenClaw can use **Firecrawl** as a fallback extractor for `web_fetch`. It is a hosted
 content extraction service that supports bot circumvention and caching, which helps
 with JS-heavy sites or pages that block plain HTTP fetches.
