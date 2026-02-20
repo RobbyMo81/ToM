@@ -4,9 +4,9 @@ Purpose: seed `memory/as-built.sqlite` with concise, searchable architecture sta
 
 ## Peer Review Progress
 
-- peer_review_completed: `25/29`
-- peer_review_pending: `4/29`
-- last_progress_update: `2026-02-20`
+- peer_review_completed: `29/29`
+- peer_review_pending: `0/29`
+- last_progress_update: `2026-02-19`
 
 ## Record 1
 
@@ -259,7 +259,7 @@ Purpose: seed `memory/as-built.sqlite` with concise, searchable architecture sta
 - rationale: preserve consistent operator behavior and prevent misuse of runtime/vector stores during investigation and maintenance.
 - component_relationships: governance/startup references in `.tom-workspace/AGENTS.md` and `.tom-workspace/whoiam.md`; as-built progress automation via `.husky/pre-commit` and `src/scripts/updateAsBuiltPeerReviewProgress.ts`.
 - technical_validation: memory README sections and automation note are present and aligned to as-built workflows.
-- peer_review_status: pending second-builder verification
+- peer_review_status: approved (second-builder verification complete 2026-02-19)
 
 ## Record 24
 
@@ -270,7 +270,7 @@ Purpose: seed `memory/as-built.sqlite` with concise, searchable architecture sta
 - rationale: make break-glass override artifacts tamper-evident while keeping signing keys external to `.tom-workspace` artifacts.
 - component_relationships: env key config in `src/core/config.ts` and `.env.example`; verifier module in `src/core/governance/overrideToken.ts`; policy integration in `src/core/brain.ts` + `src/core/oxideGovernance.ts`; CLI token ingestion via `src/cli.ts`.
 - technical_validation: `npm run lint` and `npm run build` pass after dependency and runtime wiring updates.
-- peer_review_status: pending second-builder verification
+- peer_review_status: approved (second-builder verification complete 2026-02-19)
 
 ## Record 25
 
@@ -281,7 +281,7 @@ Purpose: seed `memory/as-built.sqlite` with concise, searchable architecture sta
 - rationale: provide runtime context visibility to Electron UI while preserving renderer isolation and keeping authority/data access in main process.
 - component_relationships: renderer calls preload bridge -> main IPC handler -> ToM API (`/lineage/latest`) primary path -> optional runtime SQLite fallback in main only.
 - technical_validation: `npm run build` and `npm run lint` pass after bridge implementation; smoke validation report captured at `docs/reports/Electron_Context_Bridge_Smoke_Report_2026-02-19.md`.
-- peer_review_status: pending second-builder verification
+- peer_review_status: approved (second-builder verification complete 2026-02-19)
 
 ## Record 26
 
@@ -292,7 +292,7 @@ Purpose: seed `memory/as-built.sqlite` with concise, searchable architecture sta
 - rationale: eliminate architecture drift by aligning plan assumptions with implemented runtime behavior and preserving auditable promotion artifacts.
 - component_relationships: plan links to Electron main/preload implementation and smoke-test evidence report for closure traceability.
 - technical_validation: markdown lint pass on plan/report artifacts and commits pushed to `main`.
-- peer_review_status: pending second-builder verification
+- peer_review_status: approved (second-builder verification complete 2026-02-19)
 
 ## Record 27
 
@@ -370,10 +370,10 @@ Use this table to complete the required second-builder verification.
 | 20 | Claude Sonnet 4.6 | 2026-02-19 | `isAuthorized` parses `Authorization: Bearer`, returns `401` for missing/invalid token. Guard runs before all route handlers; OPTIONS pre-flight intentionally excluded. | approved |
 | 21 | Claude Sonnet 4.6 | 2026-02-19 | `CycleReport` in `types.ts` has all five listed metrics plus `startedAt`/`finishedAt`. `runCycle` records LearnedSkill, Proposal, ValidationResult, Approval, Deploy with identity metadata. | approved |
 | 22 | Claude Sonnet 4.6 | 2026-02-19 | `memory/README.md` documents 250,000-token compaction threshold and `tom_runtime.sqlite` as target. Policy references in `AGENTS.md` and `whoiam.md` confirmed. | approved |
-| 23 | pending | pending | pending |  |
-| 24 | pending | pending | pending |  |
-| 25 | pending | pending | pending |  |
-| 26 | pending | pending | pending |  |
+| 23 | GitHub Copilot | 2026-02-19 | `memory/README.md` confirms role contract for `tom_brain.sqlite`/`tom_runtime.sqlite`/`as-built.sqlite`, compaction policy, architecture update standards, and pre-commit `asbuilt:progress` automation note. | approved |
+| 24 | GitHub Copilot | 2026-02-19 | Verified `overrideToken.ts` (Zod schema + canonical JSON + HMAC-SHA256 + timing-safe compare), env key wiring in `config.ts`/`.env.example`, policy consumption in `brain.ts` + `oxideGovernance.ts`, and CLI ingestion path in `cli.ts`. | approved |
+| 25 | GitHub Copilot | 2026-02-19 | `electron/main/index.ts` exposes `context:get` with API-first `/lineage/latest`, deterministic degraded responses, and optional `ELECTRON_CONTEXT_SQLITE_FALLBACK=1`; `electron/preload/preload.ts` exposes `window.api.getContext()`. Smoke artifact confirmed. | approved |
+| 26 | GitHub Copilot | 2026-02-19 | `docs/plans/Plan-Electron_MCP_ContextDB.md` is methodology-aligned v2 promotion with rollback/monitoring gates and validation commit links (`c453049`, `1202744`, `036c2e9`); related smoke report present. | approved |
 | 27 | Claude Sonnet 4.6 | 2026-02-19 | `IPC_PERMITTED_ACTIONS` Set confirmed blocking `policy.*`/`oxide.*`; 64 KB token size cap in `parseRendererIntent` confirmed; `gateEntered` flag confirmed deduplicating audit events. Lint and tsc clean. | approved |
 | 28 | Claude Sonnet 4.6 | 2026-02-19 | `realpathSync` import and try/catch fallback confirmed in `assertOverridePermits` loop; applied to both `allowed_paths` and `disallowed_paths` checks. Lint and tsc clean. | approved |
 | 29 | Claude Sonnet 4.6 | 2026-02-19 | `HOT_REPLAY_CACHE` module-level Set confirmed; `hasSeen` hot-cache pre-check confirmed; `markSeen` return type changed to `boolean` with synchronous `has()`/`add()` claim confirmed. IPC handler throw-on-false confirmed. Lint and tsc clean. | approved |
