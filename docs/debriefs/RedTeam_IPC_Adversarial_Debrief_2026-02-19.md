@@ -667,3 +667,23 @@ to any governance enforcement module.
 ### Current posture
 
 IPC privilege boundary has moved from **CRITICAL** to **HARDENED (v1)** under current red-team scope.
+
+---
+
+## Second Pass Progression (Follow-up)
+
+- A focused second-pass report has been produced at:
+  - `docs/reports/RedTeam_IPC_SecondPass_Report_2026-02-19.md`
+- Second-pass scope includes:
+  - path traversal attempts
+  - identity confusion attempts
+  - override token tampering
+  - replay reuse checks
+  - error-oracle leakage checks
+
+Second-pass conclusion remains consistent with the remediation update:
+
+- Critical renderer-context trust violation remains closed.
+- Replay control wiring is present in IPC handler (`hasSeen` pre-check + `markSeen` consume).
+- Error leakage posture is normalized for unexpected failures.
+- IPC boundary status: **HARDENED (v1)**.
