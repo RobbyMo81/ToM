@@ -293,6 +293,8 @@ Primary env controls:
 - `TOM_API_HOST`
 - `TOM_API_PORT`
 - `TOM_API_TOKEN`
+- `ELECTRON_CONTEXT_SQLITE_FALLBACK`
+- `SENTRY_SPOTLIGHT`
 - `TOM_RUNTIME_DB_PATH`
 - `WHOIAM_SYNC_SCHEDULE`
 - `WHOIAM_DOC_PATH`
@@ -484,14 +486,13 @@ Enhancement completion protocol:
 ---
 
 <!-- WHOIAM_AUTO_SYNC:START -->
-
 ## 10) Auto-Sync Architecture Snapshot (Generated)
 
 This section is auto-maintained by the WhoAmI sync cron.
 
-- synced_at: 2026-02-19T00:08:16.704Z
-- watched_files: 11
-- changed_files: 11
+- synced_at: 2026-02-20T08:15:00.352Z
+- watched_files: 12
+- changed_files: 7
 
 ### Detected Runtime Wiring
 
@@ -500,30 +501,27 @@ This section is auto-maintained by the WhoAmI sync cron.
 
 ### Changed Files Since Last Sync
 
-- src/index.ts
 - src/core/config.ts
 - src/core/brain.ts
 - src/integrations/knowledgeLoader.ts
-- src/integrations/vectorStore.ts
 - src/api/httpServer.ts
-- src/jobs/cycleJob.ts
-- src/jobs/githubSyncJob.ts
-- src/integrations/githubReportSync.ts
 - package.json
 - README.md
+- docs/reports/**
 
 ### Watched File Hashes
 
 - src/index.ts: 5a3348551d2bfe7bc04046d94d0fd09112c23b543b32f893fca000948aaf0aaa
-- src/core/config.ts: 399bf5b498c1c0cd412ed73d0d5780e0c8f8311ef2fb5cf70b653c0347136258
-- src/core/brain.ts: 02273bff291b36ee707fdd6f610c10c5045c8052269343b0167ca14a0e1b3bc8
-- src/integrations/knowledgeLoader.ts: 8776f197ac4eef53c08c6e308545fc887d15ec0503d4f1b43f517f2452bf45a3
+- src/core/config.ts: d5f9f8f18d41d9db09eebe3b2c1290d94eb6c9ad38068bde2e9ac869387329aa
+- src/core/brain.ts: 5538844e39a9a855133721f673da51c765a96f60635f755d49d625779efcee13
+- src/integrations/knowledgeLoader.ts: ecee927a6f3709a278d2a66f7ca858e8d3b515c954494493994b2407ca63e00d
 - src/integrations/vectorStore.ts: f00b9175bec887bc7981923534fc2c6e02984c50994c615718de5c6f5e73cf4b
-- src/api/httpServer.ts: aaac6e8d900a5d606dbb64061ac9d70321dd0e534f17c8bde79eeef4d6b5420f
+- src/api/httpServer.ts: f29dad96a00e474896cd1b344cc8e87030e2afef65856b2880afb1bf4aad7a2b
 - src/jobs/cycleJob.ts: 0f387a4ac41aa8c841f5c51753dded7734a59dd2eda161fa13fd0027f544da73
 - src/jobs/githubSyncJob.ts: da021b9721076d8b6db01b053805817d168faeec79a82f8e766dcdf034a42aed
 - src/integrations/githubReportSync.ts: 49384c8df49781f378f0f88c0f5d22576bf6a4b98f81ce69b1222de24619d2ad
-- package.json: e9fe548bf143ce8eb74205ed6801f91eda8ec33e38ef899c28216a430aa721f4
-- README.md: f86f77fc412c73d9ef3f4eec78ee8cbd01f984eb1e9cde6ae546a682f5c53522
+- package.json: 4cfe51fd4901d40dc44a524849fe3aa811d55d87726610a24e4dfceb6237810b
+- README.md: f021414f1611f89c791b11463f5df584bf5aa74753aa2309b5f502c182ea71cb
+- docs/reports/**: missing
 
 <!-- WHOIAM_AUTO_SYNC:END -->

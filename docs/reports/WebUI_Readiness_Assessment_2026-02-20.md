@@ -79,3 +79,48 @@ Interpretation:
 ## Final Recommendation
 
 Start WebUI implementation now under **Conditional GO**, with release promotion blocked until packaging stability is green and documentation alignment tasks are closed.
+
+## Updated "Must-Do" Checklist
+
+To move from Conditional GO to Full Promotion, fulfill these final technical alignment tasks:
+
+- [x] Environment Hygiene: Add `ELECTRON_CONTEXT_SQLITE_FALLBACK` and `SENTRY_SPOTLIGHT` to the environment control list in `.tom-workspace/whoiam.md`.
+- [x] Packaging Stability: Re-run `npm run electron:build` after enabling Developer Mode and verify a successful artifact generation.
+- [x] Documentation: Normalize `Plan-WebUI_Interagion_N-Start.md` into the standard Research/Plan/Verify format used by ToM.
+
+## Step Execution Report (Completed)
+
+### 1) Environment Hygiene
+
+- File updated: `.tom-workspace/whoiam.md`
+- Change applied under "Configuration Surface (Operational Controls)":
+  - Added `ELECTRON_CONTEXT_SQLITE_FALLBACK`
+  - Added `SENTRY_SPOTLIGHT`
+- Result: configuration control list now includes required WebUI/Electron toggles.
+
+### 2) Packaging Stability
+
+- Developer Mode verification:
+  - Registry read (`HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock`) returned `AllowDevelopmentWithoutDevLicense : 1`.
+- Developer Mode set attempt:
+  - `reg add ... AllowDevelopmentWithoutDevLicense=1` returned `ERROR: Access is denied.`
+  - Issue classification: expected privilege boundary (non-admin shell), not a blocker because flag was already enabled.
+- Packaging command executed:
+  - `npm run electron:build`
+  - Result: success with packaged output present at `dist/win-unpacked` (verified by filesystem check).
+
+### 3) Documentation Normalization
+
+- File normalized: `docs/plans/Plan-WebUI_Interagion_N-Start.md`
+- New structure includes:
+  - `RESEARCH`
+  - `PLAN`
+  - `VERIFY`
+  - explicit assumptions, risks, success criteria, and promotion gate.
+- Result: plan now conforms to ToM methodology format expectations for implementation kickoff.
+
+## Issues Encountered
+
+1. `reg add` returned access denied from non-elevated shell.
+   - Impact: none (Developer Mode was already enabled).
+2. No additional build/package issues observed in the final verification run.
