@@ -41,3 +41,4 @@ Architecture narrative, reference snapshot, and as-built retrieval index are now
 
 - Complete second-builder peer review sign-off for new records 25 and 26 in:
   - `docs/reference/AsBuilt_Architecture_Snapshot_2026-02-19.md`
+- Closure record: `docs/debriefs/AsBuilt_Peer_Review_Closure_Debrief_2026-02-19.md`.
