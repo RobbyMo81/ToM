@@ -220,3 +220,28 @@ Promote a practical v2 architecture where Electron context visibility is API-fir
 - Practicality improves when we reuse existing runtime API contracts instead of introducing new schema and direct DB coupling by default.
 - Spotlight sidecar can remain useful without forcing Sentry adoption in baseline implementation.
 - Context observability should be additive and must not modify the hardened privilege boundary.
+
+## VALIDATION EVIDENCE
+
+- Implementation commit:
+  - `c453049` — API-first context bridge added (`context:get` in main + `window.api.getContext` in preload), v2 plan promoted.
+- Smoke validation commit:
+  - `1202744` — added context bridge smoke report artifact.
+- Evidence report:
+  - `docs/reports/Electron_Context_Bridge_Smoke_Report_2026-02-19.md`
+
+### Evidence summary
+
+- Build and lint checks passed after bridge implementation:
+  - `npm run build`
+  - `npm run lint`
+- API-first data source confirmed live with authorization:
+  - `GET /health` -> `200`
+  - `GET /lineage/latest` returned valid lineage JSON payload.
+- Renderer verification step (manual DevTools completion):
+  - `await window.api.getContext()`
+
+### Traceability links
+
+- Plan artifact: `docs/plans/Plan-Electron_MCP_ContextDB.md`
+- Runtime validation artifact: `docs/reports/Electron_Context_Bridge_Smoke_Report_2026-02-19.md`
