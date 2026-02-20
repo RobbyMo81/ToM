@@ -19,6 +19,12 @@ function ensureParentDirectory(filePath: string): void {
   }
 }
 
+// Process-level hot cache shared across all OverrideReplayLedger instances.
+// Closes the TOCTOU window between hasSeen (read) and markSeen (write) when
+// two concurrent IPC requests arrive with the same token before either has
+// persisted to the JSONL ledger.
+const HOT_REPLAY_CACHE = new Set<string>();
+
 export class OverrideReplayLedger {
   private readonly filePath: string;
   private readonly seen = new Set<string>();
@@ -29,15 +35,29 @@ export class OverrideReplayLedger {
   }
 
   hasSeen(overrideId: string, nonce: string): boolean {
+    const key = buildReplayKey(overrideId, nonce);
+    if (HOT_REPLAY_CACHE.has(key)) {
+      return true;
+    }
     this.loadIfNeeded();
-    return this.seen.has(buildReplayKey(overrideId, nonce));
+    return this.seen.has(key);
   }
 
-  markSeen(overrideId: string, nonce: string, tokenHash: string, acceptedAt: string): void {
-    this.loadIfNeeded();
+  // Returns true if the key was newly recorded, false if it was already seen
+  // (either via the hot cache from a concurrent request, or from the JSONL ledger).
+  markSeen(overrideId: string, nonce: string, tokenHash: string, acceptedAt: string): boolean {
     const key = buildReplayKey(overrideId, nonce);
+
+    // Synchronous hot-cache claim — no await between has() and add(), so this
+    // is atomic within Node.js's single-threaded event loop.
+    if (HOT_REPLAY_CACHE.has(key)) {
+      return false;
+    }
+    HOT_REPLAY_CACHE.add(key);
+
+    this.loadIfNeeded();
     if (this.seen.has(key)) {
-      return;
+      return false;
     }
 
     const record: ReplayRecord = {
@@ -50,6 +70,7 @@ export class OverrideReplayLedger {
     ensureParentDirectory(this.filePath);
     appendFileSync(this.filePath, `${JSON.stringify(record)}\n`, "utf8");
     this.seen.add(key);
+    return true;
   }
 
   private loadIfNeeded(): void {

@@ -1,3 +1,4 @@
+import { realpathSync } from "node:fs";
 import path from "node:path";
 import { type OverrideToken } from "./overrideToken";
 
@@ -76,7 +77,17 @@ export function assertOverridePermits(
 
   for (const targetPath of affectedPaths) {
     const absoluteTarget = path.resolve(workspaceRoot, targetPath);
-    const relativeTarget = normalizeForCompare(path.relative(workspaceRoot, absoluteTarget));
+
+    // Resolve symlinks before scope comparison so a symlink inside an allowed
+    // directory cannot escape to a disallowed target. Falls back to the lexical
+    // path for paths that do not exist yet (new files have no symlink target).
+    let realAbsoluteTarget: string;
+    try {
+      realAbsoluteTarget = realpathSync(absoluteTarget);
+    } catch {
+      realAbsoluteTarget = absoluteTarget;
+    }
+    const relativeTarget = normalizeForCompare(path.relative(workspaceRoot, realAbsoluteTarget));
 
     const allowed = token.project.scope.allowed_paths.some((scopePath) => isPathWithinScope(relativeTarget, scopePath));
     if (!allowed) {
