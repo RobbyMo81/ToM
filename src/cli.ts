@@ -6,6 +6,7 @@ import { syncWhoiamDocument } from "./integrations/whoiamSync";
 import { RuntimeMemoryStore } from "./integrations/runtimeMemoryStore";
 import { readFile } from "node:fs/promises";
 import { OverrideRevocationStore } from "./core/governance/overrideRevocation";
+import { spawn } from "node:child_process";
 
 function parseOption(args: string[], name: string): string | undefined {
   const optionIndex = args.findIndex((value) => value === name);
@@ -206,6 +207,20 @@ async function run(): Promise<void> {
     if (command === "whoiam-sync") {
       const report = await syncWhoiamDocument(config);
       logger.info("WhoAmI sync report", report);
+      return;
+    }
+
+    if (command === "ui") {
+      // Launch the Electron UI (development mode)
+      const proc = spawn(process.platform === 'win32' ? 'npm.cmd' : 'npm', ['run', 'electron:dev'], {
+        stdio: 'inherit',
+        shell: false,
+        env: { ...process.env, NODE_ENV: 'development' },
+      });
+
+      proc.on('close', (code) => {
+        logger.info(`Electron process exited with code ${code}`);
+      });
       return;
     }
 

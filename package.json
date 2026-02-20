@@ -34,6 +34,8 @@
     "asbuilt:query": "tsx src/scripts/asBuiltCli.ts query",
     "asbuilt:generate": "tsx src/scripts/asBuiltCli.ts generate",
     "asbuilt:progress": "tsx src/scripts/updateAsBuiltPeerReviewProgress.ts",
+    "renderer:dev": "vite --config electron/renderer/vite.config.ts",
+    "renderer:build": "vite build --config electron/renderer/vite.config.ts --outDir electron/renderer/dist",
     "lineage:smoke": "tsx src/scripts/lineageSmoke.ts",
     "oxide:validate-proposal": "tsx src/scripts/oxideValidateProposal.ts",
     "oxide:policy-sim": "tsx src/scripts/oxidePolicySim.ts",
@@ -41,6 +43,8 @@
     "rust:lint": "cargo clippy --manifest-path oxide-brain/Cargo.toml -- -D warnings",
     "rust:run": "cargo run --manifest-path oxide-brain/Cargo.toml --bin oxide-brain-cli",
     "query:api": "node -e \"fetch('http://127.0.0.1:8787/query',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({question:'What did I learn about SSH hardening?'})}).then(r=>r.text()).then(console.log)\"",
+    "electron:dev": "electron .",
+    "electron:build": "npm run renderer:build && electron-builder --dir",
     "prepare": "husky"
   },
   "engines": {
@@ -57,6 +61,7 @@
   "devDependencies": {
     "@commitlint/cli": "^20.4.1",
     "@commitlint/config-conventional": "^20.4.1",
+    "@spotlightjs/sidecar": "^2.5.0",
     "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^22.15.2",
     "@types/node-cron": "^3.0.11",
@@ -68,6 +73,23 @@
     "markdownlint-cli": "^0.47.0",
     "prettier": "^3.8.1",
     "tsx": "^4.20.0",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "vite": "^5.3.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "@vitejs/plugin-react": "^4.0.0",
+    "asar": "^3.0.3",
+    "electron": "^26.2.0",
+    "electron-builder": "^24.6.0"
+  },
+  "build": {
+    "extraMetadata": {
+      "main": "electron/main/packaging-main.js"
+    },
+    "files": [
+      "electron/**",
+      "electron/renderer/dist/**",
+      "!node_modules/@spotlightjs/sidecar/**"
+    ]
   }
 }

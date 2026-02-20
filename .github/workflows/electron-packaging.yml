@@ -1,0 +1,35 @@
+name: Electron Packaging CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build renderer
+        run: npm run renderer:build
+
+      - name: Build electron (directory)
+        run: npm run electron:build
+
+      - name: Verify sidecar not packaged
+        run: node ./scripts/verify_no_sidecar_in_build.js
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: electron-build-dist
+          path: dist

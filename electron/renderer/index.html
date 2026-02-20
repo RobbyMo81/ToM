@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ToM Electron Prototype</title>
+    <style>
+      body { font-family: system-ui, sans-serif; margin: 24px; }
+      button { padding: 8px 12px; margin-right: 8px }
+      pre { background:#111; color:#eee; padding:12px }
+    </style>
+  </head>
+  <body>
+    <h1>ToM — Electron Prototype</h1>
+    <p>Development-only prototype renderer. Uses a secure preload bridge to call privileged APIs.</p>
+
+    <div>
+      <button id="btn-go">Test GO</button>
+      <button id="btn-nogo">Test NO-GO</button>
+    </div>
+
+    <h2>Result</h2>
+    <pre id="output">(no result)</pre>
+
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
