@@ -7,6 +7,7 @@ Purpose: seed `memory/as-built.sqlite` with concise, searchable architecture sta
 - peer_review_completed: `29/29`
 - peer_review_pending: `0/29`
 - last_progress_update: `2026-02-19`
+- signoff_status: `complete` (all records approved)
 
 ## Record 1
 
@@ -339,6 +340,7 @@ Purpose: seed `memory/as-built.sqlite` with concise, searchable architecture sta
 - `electron/main/index.ts`
 - `docs/debriefs/RedTeam_IPC_Phase2_Logic_Scope_Debrief_2026-02-19.md`
 - `docs/debriefs/Architecture_Drift_Elimination_Debrief_2026-02-19.md`
+- `docs/debriefs/AsBuilt_Peer_Review_Closure_Debrief_2026-02-19.md`
 - `docs/build/Build_Instance_OXIDE_Skill_to_Logic.md`
 - `docs/handoffs/CTO_Escalation_OXIDE_Remaining_Open_Tasks_2026-02-19.md`
 
