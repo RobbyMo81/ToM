@@ -3,13 +3,30 @@ const { sanitizeRequestForTelemetry } = require('../electron/main/sanitize')
 
 function run() {
   // Sensitive override token should be redacted
-  const req = { context: { overrideToken: { override_id: 'abc', secret: 'SECRET' }, resolveKey: () => {}, isRevoked: () => false }, whoiam: 'secret' }
+  const req = {
+    action: 'policy.create_proposal',
+    context: {
+      action: 'policy.create_proposal',
+      affectedPaths: ['memory/'],
+      finalGateStatus: 'NO-GO',
+      overrideToken: { override_id: 'abc', secret: 'SECRET' },
+      resolveKey: () => {},
+      isRevoked: () => false,
+    },
+    overrideToken: { override_id: 'abc', secret: 'SECRET' },
+    whoiam: 'secret',
+    injected: 'should-not-pass',
+  }
   const sanitized = sanitizeRequestForTelemetry(req)
+  assert.strictEqual(Object.getPrototypeOf(sanitized), null)
   assert.strictEqual(typeof sanitized.context, 'object')
+  assert.strictEqual(Object.getPrototypeOf(sanitized.context), null)
   assert.deepStrictEqual(sanitized.context.overrideToken, { override_id: 'abc' })
+  assert.deepStrictEqual(sanitized.overrideToken, { override_id: 'abc' })
   assert.strictEqual(sanitized.context.resolveKey, undefined)
   assert.strictEqual(sanitized.context.isRevoked, undefined)
   assert.strictEqual(sanitized.whoiam, undefined)
+  assert.strictEqual(sanitized.injected, undefined)
 
   // Non-object passes through
   assert.strictEqual(sanitizeRequestForTelemetry(null), null)
