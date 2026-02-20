@@ -1,0 +1,37 @@
+# GitHub Sync Report
+
+- synced_at: 2026-02-20T16:00:00.848Z
+- repo: RobbyMo81/ToM
+- url: https://github.com/RobbyMo81/ToM
+- default_branch: main
+- stars: 0
+- forks: 0
+- open_issues: 0
+- pushed_at: 2026-02-20T15:51:10Z
+- updated_at: 2026-02-20T15:51:14Z
+
+## Description
+
+(none)
+
+## Latest Commits
+
+- dbd2938 | Rob Mosher | 2026-02-20T15:51:06Z
+  - chore(sync): publish remaining local workspace changes
+  - https://github.com/RobbyMo81/ToM/commit/dbd29380d4777048ff512281c7db1443ceb549dd
+
+- 9918a7c | Rob Mosher | 2026-02-20T15:50:12Z
+  - docs(webui): complete pre-design prep alignment and verification
+  - https://github.com/RobbyMo81/ToM/commit/9918a7cb2d0701c3aaa5c5731b4e09de88a42c99
+
+- 7ff4499 | Rob Mosher | 2026-02-20T15:14:53Z
+  - docs(reports): add WebUI readiness assessment
+  - https://github.com/RobbyMo81/ToM/commit/7ff449920627de2ebecead13c43020966ab76f62
+
+- 5b2dd92 | Rob Mosher | 2026-02-20T06:13:46Z
+  - docs(debrief): cross-link drift elimination to as-built closure
+  - https://github.com/RobbyMo81/ToM/commit/5b2dd9259e71d3dd76aee81780714e33986047c0
+
+- 7713bff | Rob Mosher | 2026-02-20T06:12:04Z
+  - docs(as-built): add peer-review closure debrief and signoff marker
+  - https://github.com/RobbyMo81/ToM/commit/7713bff171a16e6f426d6bb685260fa780fd017f
