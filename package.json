@@ -8,6 +8,7 @@
   "description": "ToM knowledge brain with local Ollama embeddings, SQLite vector storage, Brave web enrichment, and cron orchestration.",
   "main": "dist/index.js",
   "type": "commonjs",
+  "author": "ToM Engineering <devs@example.com>",
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "lint": "eslint \"src/**/*.ts\" \"packages/**/*.ts\"",
