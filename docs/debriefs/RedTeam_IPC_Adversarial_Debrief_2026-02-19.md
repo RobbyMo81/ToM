@@ -687,3 +687,16 @@ Second-pass conclusion remains consistent with the remediation update:
 - Replay control wiring is present in IPC handler (`hasSeen` pre-check + `markSeen` consume).
 - Error leakage posture is normalized for unexpected failures.
 - IPC boundary status: **HARDENED (v1)**.
+
+---
+
+## Live Execution Preparation (Phase 3)
+
+- Live runbook created for renderer DevTools execution:
+  - `docs/reports/RedTeam_IPC_Live_Runbook_2026-02-19.md`
+- Environment/process readiness confirmed for live pass:
+  - backend reachable on `127.0.0.1:8787` (auth-protected response observed)
+  - Electron dev process active
+  - baseline `PRIVILEGE_DENIED` count query captured for before/after comparisons
+
+Phase 3 execution is now operator-ready; next step is running payloads in renderer DevTools and recording response/audit transcripts.
