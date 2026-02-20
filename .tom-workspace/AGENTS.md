@@ -187,6 +187,17 @@ Shared visibility requirement:
 - Do not isolate these paths per-agent; both agents read/write from the same
   canonical workspace locations.
 
+Directory permission contract:
+
+- **ToM** has full workspace visibility and executive governance authority.
+- **O.X.I.D.E** has full directory permissions for:
+  - maintenance work across repository directories,
+  - tool creation and updates under `./tools/`,
+  - skill creation and updates under `./skills/`.
+- O.X.I.D.E may create and modify files needed for these scopes, but must
+  remain inside governed workflow boundaries (policy gates, auditability, and
+  required documentation/debrief updates).
+
 **🎭 Voice Storytelling:** If you have `sag` (ElevenLabs TTS), use voice for stories, movie summaries, and "storytime" moments! Way more engaging than walls of text. Surprise people with funny voices.
 
 **📝 Platform Formatting:**

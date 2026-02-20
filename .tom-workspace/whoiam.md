@@ -380,6 +380,12 @@ sequenceDiagram
   are currently excluded from vector memory under planning-mode policy.
 - O.X.I.D.E automation ownership and directory-level alignment contract are
   documented in `automation/README.md` (traceability index).
+- Directory permissions:
+  - ToM retains full workspace visibility and executive governance authority.
+  - O.X.I.D.E has full directory permissions for maintenance operations and
+    for creation/updates of tools and skills (`./tools/**`, `./skills/**`).
+  - O.X.I.D.E directory access is broad for implementation work, but execution
+    remains subject to governance gates, audit logging, and policy boundaries.
 - `docs/reference/` is reserved for ToM and O.X.I.D.E-specific memory
   artifacts only.
 - Rust executor boundary: all code/config changes must be executed via `oxide`
