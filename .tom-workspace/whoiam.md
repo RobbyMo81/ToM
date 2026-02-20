@@ -138,6 +138,10 @@ must follow this pattern:
   - Runtime lineage persistence and lifecycle tracking in ToM runtime DB.
   - Lineage API visibility via `/lineage/latest` and `/lineage/runs`.
   - WhoAmI sync scheduling and living-document update pipeline.
+  - Electron API-first context bridge via main-owned `context:get` IPC and
+    preload `window.api.getContext()` surface.
+  - Dev-only Spotlight sidecar initialization in Electron main process for
+    runtime observability during local development.
 - Partial
   - Identity-oriented governance is documented, but explicit per-request
     identity binding metadata is not yet enforced on all query/generate paths.
@@ -198,6 +202,17 @@ must follow this pattern:
    - `POST /generate`
    - `POST /ingest`
    - `POST /cycle`
+
+### Electron Context Path
+
+1. `electron/main/index.ts`
+   - `ipcMain.handle('context:get', ...)` resolves context from API-first source
+     (`/lineage/latest`) with deterministic degraded responses.
+   - optional local fallback (`ELECTRON_CONTEXT_SQLITE_FALLBACK=1`) reads
+     lineage summary from runtime SQLite in main process only.
+2. `electron/preload/preload.ts`
+   - exposes `window.api.getContext()` to renderer through context-isolated
+     bridge.
 
 ### Runtime Lineage Path
 

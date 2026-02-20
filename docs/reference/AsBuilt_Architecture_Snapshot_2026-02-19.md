@@ -4,8 +4,8 @@ Purpose: seed `memory/as-built.sqlite` with concise, searchable architecture sta
 
 ## Peer Review Progress
 
-- peer_review_completed: `22/24`
-- peer_review_pending: `2/24`
+- peer_review_completed: `22/26`
+- peer_review_pending: `4/26`
 - last_progress_update: `2026-02-20`
 
 ## Record 1
@@ -272,6 +272,28 @@ Purpose: seed `memory/as-built.sqlite` with concise, searchable architecture sta
 - technical_validation: `npm run lint` and `npm run build` pass after dependency and runtime wiring updates.
 - peer_review_status: pending second-builder verification
 
+## Record 25
+
+- component_name: Electron Context Bridge (`electron/main/index.ts`, `electron/preload/preload.ts`)
+- last_updated_by: GitHub Copilot
+- version_impact: additive (API-first context retrieval surface for renderer)
+- current_state: Electron main exposes `context:get` IPC that fetches lineage context from `/lineage/latest` (API-first), with deterministic degraded responses and optional main-only SQLite fallback behind `ELECTRON_CONTEXT_SQLITE_FALLBACK=1`; preload now exposes `window.api.getContext()`.
+- rationale: provide runtime context visibility to Electron UI while preserving renderer isolation and keeping authority/data access in main process.
+- component_relationships: renderer calls preload bridge -> main IPC handler -> ToM API (`/lineage/latest`) primary path -> optional runtime SQLite fallback in main only.
+- technical_validation: `npm run build` and `npm run lint` pass after bridge implementation; smoke validation report captured at `docs/reports/Electron_Context_Bridge_Smoke_Report_2026-02-19.md`.
+- peer_review_status: pending second-builder verification
+
+## Record 26
+
+- component_name: Electron MCP + Context DB V2 Plan Promotion (`docs/plans/Plan-Electron_MCP_ContextDB.md`)
+- last_updated_by: GitHub Copilot
+- version_impact: additive (methodology-aligned architecture decision + validation traceability)
+- current_state: v2 plan promoted under ToM Methodology with API-first context strategy, optional SQLite fallback, explicit rollback/monitoring gates, and linked validation evidence (`c453049`, `1202744`, `036c2e9`).
+- rationale: eliminate architecture drift by aligning plan assumptions with implemented runtime behavior and preserving auditable promotion artifacts.
+- component_relationships: plan links to Electron main/preload implementation and smoke-test evidence report for closure traceability.
+- technical_validation: markdown lint pass on plan/report artifacts and commits pushed to `main`.
+- peer_review_status: pending second-builder verification
+
 ## Linked Artifacts
 
 - `memory/README.md`
@@ -312,3 +334,5 @@ Use this table to complete the required second-builder verification.
 | 22 | Claude Sonnet 4.6 | 2026-02-19 | `memory/README.md` documents 250,000-token compaction threshold and `tom_runtime.sqlite` as target. Policy references in `AGENTS.md` and `whoiam.md` confirmed. | approved |
 | 23 | pending | pending | pending |  |
 | 24 | pending | pending | pending |  |
+| 25 | pending | pending | pending |  |
+| 26 | pending | pending | pending |  |
