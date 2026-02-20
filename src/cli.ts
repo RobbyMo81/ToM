@@ -7,6 +7,7 @@ import { RuntimeMemoryStore } from "./integrations/runtimeMemoryStore";
 import { readFile } from "node:fs/promises";
 import { OverrideRevocationStore } from "./core/governance/overrideRevocation";
 import { spawn } from "node:child_process";
+import { timingSafeEqual } from "node:crypto";
 
 function parseOption(args: string[], name: string): string | undefined {
   const optionIndex = args.findIndex((value) => value === name);
@@ -29,6 +30,23 @@ async function loadOverrideTokenFromArgs(args: string[]): Promise<unknown | unde
 
   const content = await readFile(filePath, "utf8");
   return JSON.parse(content);
+}
+
+function requireOperatorAuth(expectedToken: string | undefined, providedToken: string | undefined): void {
+  if (!expectedToken || expectedToken.trim().length === 0) {
+    throw new Error("Unauthorized: operator token is not configured (set TOM_API_TOKEN).");
+  }
+
+  if (!providedToken || providedToken.trim().length === 0) {
+    throw new Error("Unauthorized: --operator-token (or TOM_OPERATOR_TOKEN) is required.");
+  }
+
+  const expected = Buffer.from(expectedToken, "utf8");
+  const provided = Buffer.from(providedToken, "utf8");
+
+  if (expected.length !== provided.length || !timingSafeEqual(expected, provided)) {
+    throw new Error("Unauthorized: operator token is invalid.");
+  }
 }
 
 async function run(): Promise<void> {
@@ -181,15 +199,60 @@ async function run(): Promise<void> {
     if (command === "revoke") {
       const overrideId = parseOption(rest, "--override");
       if (!overrideId || overrideId.trim().length === 0) {
-        throw new Error("Missing --override value. Example: npm run revoke -- --override <override_id> [--by <actor>] [--reason <text>]");
+        throw new Error("Missing --override value. Example: npm run revoke -- --override <override_id> [--operator-token <token>] [--by <actor>] [--reason <text>]");
       }
+
+      const operatorToken = parseOption(rest, "--operator-token") ?? process.env.TOM_OPERATOR_TOKEN;
+      requireOperatorAuth(config.api.token, operatorToken);
 
       const revokedBy = parseOption(rest, "--by") ?? "cli-operator";
       const reason = parseOption(rest, "--reason") ?? "Operator initiated revocation";
 
-      const revocationStore = new OverrideRevocationStore();
-      const record = revocationStore.revoke(overrideId.trim(), revokedBy.trim(), reason.trim());
-      logger.info("Override revoked", record);
+      const runtimeStore = new RuntimeMemoryStore(config.runtimeDbPath);
+      runtimeStore.bootstrap();
+      const workflowRunId = runtimeStore.startWorkflowRun({
+        workflowName: "tom.governance.revoke_override",
+        triggerSource: "manual",
+        initiatedBy: revokedBy.trim(),
+        context: {
+          command,
+          overrideId: overrideId.trim(),
+          actor: revokedBy.trim(),
+          reason: reason.trim(),
+        },
+      });
+
+      try {
+        runtimeStore.appendTaskEvent({
+          workflowRunId,
+          eventType: "policy",
+          eventLevel: "high",
+          message: "GOV_OVERRIDE_REVOKE",
+          payload: {
+            overrideId: overrideId.trim(),
+            actor: revokedBy.trim(),
+            reason: reason.trim(),
+            policyDecision: "operator-revocation",
+          },
+        });
+
+        const revocationStore = new OverrideRevocationStore();
+        const record = revocationStore.revoke(overrideId.trim(), revokedBy.trim(), reason.trim());
+        runtimeStore.endWorkflowRun(workflowRunId, "succeeded", {
+          overrideId: record.override_id,
+          revokedAt: record.revoked_at,
+          revokedBy: record.revoked_by,
+        });
+        logger.info("Override revoked", record);
+      } catch (error) {
+        runtimeStore.endWorkflowRun(workflowRunId, "failed", {
+          overrideId: overrideId.trim(),
+          error: error instanceof Error ? error.message : "Unknown revocation failure",
+        });
+        throw error;
+      } finally {
+        runtimeStore.close();
+      }
       return;
     }
 
@@ -229,7 +292,7 @@ async function run(): Promise<void> {
     console.log('  npm run query -- "<question>"');
     console.log('  npm run generate -- "<question>"');
     console.log("  npm run cycle [-- --override-token <path-to-json>]");
-    console.log("  npm run revoke -- --override <override_id> [--by <actor>] [--reason <text>]");
+    console.log("  npm run revoke -- --override <override_id> --operator-token <token> [--by <actor>] [--reason <text>]");
     console.log("  npm run github:sync");
     console.log("  npm run whoiam:sync");
   } finally {
