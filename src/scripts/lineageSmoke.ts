@@ -16,7 +16,13 @@ function ensure(condition: boolean, message: string): void {
 }
 
 async function fetchJson<T>(url: string): Promise<T> {
-  const response = await fetch(url);
+  const token = process.env.TOM_API_TOKEN;
+  const headers: Record<string, string> = {};
+  if (token && token.trim().length > 0) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  const response = await fetch(url, { headers });
   const body = await response.text();
 
   if (!response.ok) {
