@@ -119,6 +119,9 @@ Living Architecture Blueprint for retrieval and troubleshooting context.
 - Immediate action: populate vector memory with the current architectural state.
 - Ongoing maintenance: update vector memory concurrently with any architectural
   change or feature deployment.
+ - Reports and verification artifacts: include `docs/reports/**/*.md` as a
+   source for as-built snapshots and verification artifacts used during
+   architecture investigations.
 - Operational constraint: keep entries concise and investigation-focused; avoid
   redundant code dumps.
 - Success metric: memory reflects the 1:1 state of production so any builder can

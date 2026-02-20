@@ -22,6 +22,7 @@ It classifies files into your three domains:
 Local ingestion now includes:
 
 - project documentation in `docs/**/*.md`
+- project reports in `docs/reports/**/*.md` (as-built reports and verification artifacts)
 
 Local ingestion explicitly excludes:
 

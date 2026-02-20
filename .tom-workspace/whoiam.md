@@ -232,8 +232,15 @@ this.vectors.purgeLocalDocumentsByPathPrefix(governanceDir);
 ### Included local patterns
 
 ```ts
-const patterns = ["docs/**/*.md"];
+// Include standard docs and dedicated reports directory which contains
+// as-built architecture reports and verification artifacts used by WhoAmI
+const patterns = ["docs/**/*.md", "docs/reports/**/*.md"];
 ```
+
+Note: `docs/reports` contains generated as-built snapshots, verification logs,
+and packaging/report artifacts. Changes in `docs/reports` are now watched by
+the WhoAmI sync pipeline so the living `whoiam.md` will reflect updates to
+as-built reports.
 
 ### GitHub report scheduler guard
 
@@ -441,6 +448,8 @@ Enhancement completion protocol:
   - `./docs/handoffs`
   - `./docs/lessons`
   - `./docs/plans`
+  - `./reports'/`
+
 - `memory\\tom_brain.sqlite` is the Chroma-style long-term AI/LLM memory
   store (Python-managed) for ToM SOPs, self-improvement plans, and
   `docs\\reference` content.

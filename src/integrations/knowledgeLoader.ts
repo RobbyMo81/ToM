@@ -41,7 +41,8 @@ function inferContextTags(relativePath: string): string[] {
 }
 
 export async function loadKnowledgeDocs(config: AppConfig): Promise<KnowledgeDocument[]> {
-  const patterns = ["docs/**/*.md"];
+  // Explicitly include docs and reports under docs/reports for clarity
+  const patterns = ["docs/**/*.md", "docs/reports/**/*.md"];
 
   const matches = await glob(patterns, {
     cwd: config.knowledgeDir,

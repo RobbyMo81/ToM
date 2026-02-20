@@ -124,6 +124,8 @@ export function getConfig(): AppConfig {
       "src/integrations/githubReportSync.ts",
       "package.json",
       "README.md",
+      // Include docs reports in WhoAmI watch list so as-built reports are reflected
+      "docs/reports/**",
     ].join("|");
 
   const watchFiles = watchFilesEnv
