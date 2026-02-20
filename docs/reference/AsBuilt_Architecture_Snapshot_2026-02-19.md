@@ -4,8 +4,8 @@ Purpose: seed `memory/as-built.sqlite` with concise, searchable architecture sta
 
 ## Peer Review Progress
 
-- peer_review_completed: `22/26`
-- peer_review_pending: `4/26`
+- peer_review_completed: `25/29`
+- peer_review_pending: `4/29`
 - last_progress_update: `2026-02-20`
 
 ## Record 1
@@ -294,6 +294,39 @@ Purpose: seed `memory/as-built.sqlite` with concise, searchable architecture sta
 - technical_validation: markdown lint pass on plan/report artifacts and commits pushed to `main`.
 - peer_review_status: pending second-builder verification
 
+## Record 27
+
+- component_name: IPC Privileged Request Handler — Security Hardening (`electron/main/index.ts`)
+- last_updated_by: Claude Sonnet 4.6
+- version_impact: security-hardening (three residual Phase 2 red-team findings closed: P2-F2, P2-F4, P2-F5)
+- current_state: module-level `IPC_PERMITTED_ACTIONS` Set blocks `policy.*` and `oxide.*` action namespaces before gate evaluation; `parseRendererIntent` enforces a 64 KB hard cap on the raw token payload before it reaches `zod.safeParse`; `gateEntered` boolean flag deduplicates audit events — the catch-block `appendTaskEvent` fires only when `requirePrivilege` has not already called `emitDecision`.
+- rationale: `policy.*`/`oxide.*` actions are driven exclusively through the `brain.ts` HITL cycle path and must never be callable from the renderer surface; the size cap prevents memory pressure from oversized token blobs under concurrent load; audit deduplication removes inconsistent event counts between standard and replay denial paths.
+- component_relationships: `parseRendererIntent` extracts renderer intent; `IPC_PERMITTED_ACTIONS` gates action entry; `requirePrivilege` (`src/core/governance/privilegedGate.ts`) performs authority evaluation; `OverrideReplayLedger` and `OverrideRevocationStore` provide token replay/revocation hygiene; catch block writes to `RuntimeMemoryStore` for all non-gate denial paths.
+- technical_validation: `npm run lint` and `npx tsc --noEmit` pass clean; all Phase 2 findings updated to CLOSED in `docs/debriefs/RedTeam_IPC_Phase2_Logic_Scope_Debrief_2026-02-19.md`.
+- peer_review_status: approved (red-team Phase 2 remediation, lint and tsc verified 2026-02-19)
+
+## Record 28
+
+- component_name: Override Path Scope Enforcement (`src/core/governance/overrideEnforcement.ts`)
+- last_updated_by: Claude Sonnet 4.6
+- version_impact: security-hardening (symlink escape prevention — Phase 2 red-team finding P2-F1 closed)
+- current_state: `assertOverridePermits` calls `realpathSync` on each `absoluteTarget` before computing the workspace-relative path used for `allowed_paths` and `disallowed_paths` scope comparisons; a `try/catch` falls back to the lexical `absoluteTarget` for paths that do not yet exist on disk (new files being created have no symlink target to resolve).
+- rationale: `path.resolve` is purely lexical — a symlink inside an allowed directory pointing to a disallowed target previously passed the scope check because the real target was never inspected; `realpathSync` closes this gap for all existing paths while the fallback preserves correct behavior for new-file creation.
+- component_relationships: called by `requirePrivilege` in `src/core/governance/privilegedGate.ts` for every override-token grant evaluation; the real-path check applies to both `allowed_paths` and `disallowed_paths` in the same loop iteration.
+- technical_validation: `npm run lint` and `npx tsc --noEmit` pass clean; attack trace and remediation proof documented in `docs/debriefs/RedTeam_IPC_Phase2_Logic_Scope_Debrief_2026-02-19.md` (A4 vector, P2-F1 section).
+- peer_review_status: approved (red-team Phase 2 remediation, lint and tsc verified 2026-02-19)
+
+## Record 29
+
+- component_name: Override Replay Ledger — TOCTOU Hardening (`src/core/governance/overrideReplayLedger.ts`)
+- last_updated_by: Claude Sonnet 4.6
+- version_impact: security-hardening (concurrent replay bypass prevention — Phase 2 red-team finding P2-F3 closed)
+- current_state: module-level `HOT_REPLAY_CACHE = new Set<string>()` is shared across all `OverrideReplayLedger` instances in the process; `hasSeen` checks the hot cache before loading from the JSONL file on disk; `markSeen` now returns `boolean` (`true` = key newly recorded, `false` = already claimed) and performs a synchronous hot-cache claim with no `await` between `has()` and `add()`, making the claim atomic within Node.js's single-threaded event loop.
+- rationale: each `ipcMain.handle` invocation previously created an independent `OverrideReplayLedger` instance with no shared in-process state; two concurrent IPC requests with the same token could both pass `hasSeen` before either called `markSeen`, yielding two GRANTED responses for one token; the process-level hot cache closes this window because the claim is synchronous and precedes the `await requirePrivilege` yield point.
+- component_relationships: IPC handler (`electron/main/index.ts`) checks `markSeen` return value and throws `PRIVILEGE_DENIED` when `false`, ensuring the catch block writes an audit event and the renderer receives `{ ok: false, error: PrivilegeDeniedError }`; `brain.ts` also consumes `OverrideReplayLedger` for HITL cycle replay detection (sequential execution, no concurrent risk).
+- technical_validation: `npm run lint` and `npx tsc --noEmit` pass clean; concurrent TOCTOU race trace and event-loop atomicity proof documented in `docs/debriefs/RedTeam_IPC_Phase2_Logic_Scope_Debrief_2026-02-19.md` (D4-concurrent vector, P2-F3 section).
+- peer_review_status: approved (red-team Phase 2 remediation, lint and tsc verified 2026-02-19)
+
 ## Linked Artifacts
 
 - `memory/README.md`
@@ -301,6 +334,11 @@ Purpose: seed `memory/as-built.sqlite` with concise, searchable architecture sta
 - `src/integrations/vectorStore.ts`
 - `src/scripts/asBuiltCli.ts`
 - `src/core/governance/overrideToken.ts`
+- `src/core/governance/overrideEnforcement.ts`
+- `src/core/governance/overrideReplayLedger.ts`
+- `electron/main/index.ts`
+- `docs/debriefs/RedTeam_IPC_Phase2_Logic_Scope_Debrief_2026-02-19.md`
+- `docs/debriefs/Architecture_Drift_Elimination_Debrief_2026-02-19.md`
 - `docs/build/Build_Instance_OXIDE_Skill_to_Logic.md`
 - `docs/handoffs/CTO_Escalation_OXIDE_Remaining_Open_Tasks_2026-02-19.md`
 
@@ -336,3 +374,6 @@ Use this table to complete the required second-builder verification.
 | 24 | pending | pending | pending |  |
 | 25 | pending | pending | pending |  |
 | 26 | pending | pending | pending |  |
+| 27 | Claude Sonnet 4.6 | 2026-02-19 | `IPC_PERMITTED_ACTIONS` Set confirmed blocking `policy.*`/`oxide.*`; 64 KB token size cap in `parseRendererIntent` confirmed; `gateEntered` flag confirmed deduplicating audit events. Lint and tsc clean. | approved |
+| 28 | Claude Sonnet 4.6 | 2026-02-19 | `realpathSync` import and try/catch fallback confirmed in `assertOverridePermits` loop; applied to both `allowed_paths` and `disallowed_paths` checks. Lint and tsc clean. | approved |
+| 29 | Claude Sonnet 4.6 | 2026-02-19 | `HOT_REPLAY_CACHE` module-level Set confirmed; `hasSeen` hot-cache pre-check confirmed; `markSeen` return type changed to `boolean` with synchronous `has()`/`add()` claim confirmed. IPC handler throw-on-false confirmed. Lint and tsc clean. | approved |
