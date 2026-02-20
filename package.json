@@ -45,6 +45,7 @@
     "query:api": "node -e \"fetch('http://127.0.0.1:8787/query',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({question:'What did I learn about SSH hardening?'})}).then(r=>r.text()).then(console.log)\"",
     "electron:dev": "electron .",
     "electron:build": "npm run renderer:build && electron-builder --dir",
+    "test:sanitize": "node ./scripts/test_sanitize.js",
     "prepare": "husky"
   },
   "engines": {
@@ -83,6 +84,8 @@
     "electron-builder": "^24.6.0"
   },
   "build": {
+    "productName": "ToM Brain",
+    "appId": "com.robymo.tom",
     "extraMetadata": {
       "main": "electron/main/packaging-main.js"
     },
@@ -90,6 +93,14 @@
       "electron/**",
       "electron/renderer/dist/**",
       "!node_modules/@spotlightjs/sidecar/**"
-    ]
+    ],
+    "win": {
+      "target": ["nsis"]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false
+    },
+    "asar": true
   }
 }
